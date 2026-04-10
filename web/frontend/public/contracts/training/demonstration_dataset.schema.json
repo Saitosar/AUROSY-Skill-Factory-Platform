@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-foundry/training/demonstration-dataset-v1",
+  "title": "DemonstrationDataset v1",
+  "type": "object",
+  "required": ["schema_version", "robot_model", "sampling_hz", "obs_schema_ref", "episodes"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "robot_model": { "type": "string", "minLength": 1 },
+    "sampling_hz": { "type": "number", "exclusiveMinimum": 0 },
+    "obs_schema_ref": { "type": "string", "minLength": 1 },
+    "simulator": { "type": "string" },
+    "simulator_commit": { "type": "string" },
+    "seed": { "type": "integer" },
+    "episodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["episode_id", "steps"],
+        "properties": {
+          "episode_id": { "type": "string", "minLength": 1 },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["obs", "act", "done"],
+              "properties": {
+                "obs": { "type": "array", "minItems": 1, "items": { "type": "number" } },
+                "act": { "type": "array", "minItems": 1, "items": { "type": "number" } },
+                "done": { "type": "boolean" },
+                "ref": { "type": ["array", "null"], "items": { "type": "number" } }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

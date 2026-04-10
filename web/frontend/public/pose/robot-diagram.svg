@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" fill="none" aria-hidden="true">
+  <rect width="200" height="320" fill="#12161e"/>
+  <g stroke="#334155" stroke-width="2" opacity="0.9">
+    <ellipse cx="100" cy="36" rx="22" ry="20"/>
+    <line x1="100" y1="56" x2="100" y2="120"/>
+    <line x1="100" y1="80" x2="62" y2="100"/>
+    <line x1="100" y1="80" x2="138" y2="100"/>
+    <line x1="100" y1="120" x2="72" y2="200"/>
+    <line x1="100" y1="120" x2="128" y2="200"/>
+    <line x1="72" y1="200" x2="60" y2="280"/>
+    <line x1="128" y1="200" x2="140" y2="280"/>
+  </g>
+  <text x="100" y="310" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="11">G1 · placeholder</text>
+</svg>

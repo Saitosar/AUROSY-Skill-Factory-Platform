@@ -1,0 +1,6 @@
+{
+  "imageSrc": "/pose/robot-diagram.svg",
+  "viewBox": "0 0 100 100",
+  "comment": "Normalized SVG overlay (0-100). Each zone maps to one group name from GET /api/joints (match by index order if names differ).",
+  "zones": []
+}

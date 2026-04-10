@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AUROSY Skill Factory — документ для сооснователей</title>
+  <meta name="description" content="Видение, ценность, архитектура и модули платформы AUROSY Skill Factory для CEO, CPO и технического Product Owner." />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222c;
+      --border: #2a3544;
+      --text: #e8eef4;
+      --muted: #9aa8b8;
+      --accent: #2dd4bf;
+      --accent-dim: rgba(45, 212, 191, 0.15);
+      --summary-bg: #141c24;
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+      --sidebar-w: 17rem;
+      --radius: 10px;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 1rem;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    body.compact .for-po-detail {
+      display: none !important;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      color: #5eead4;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 100;
+      padding: 0.75rem 1rem;
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 600;
+    }
+
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+    }
+
+    /* ——— Sidebar / TOC ——— */
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar-w);
+      padding: 1.25rem 1rem 2rem;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      z-index: 40;
+      transform: translateX(0);
+      transition: transform 0.2s ease;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 35;
+    }
+
+    .sidebar-backdrop.is-open {
+      display: block;
+    }
+
+    .nav-toggle {
+      display: none;
+      position: fixed;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 50;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+
+    .nav-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .mode-toggle {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--summary-bg);
+      color: var(--text);
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+
+    .mode-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .toc-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+
+    .toc {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .toc a {
+      display: block;
+      padding: 0.35rem 0.5rem;
+      margin-bottom: 2px;
+      border-radius: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+
+    .toc a:hover {
+      color: var(--text);
+      background: var(--accent-dim);
+    }
+
+    .toc a.is-active {
+      color: var(--accent);
+      background: var(--accent-dim);
+      font-weight: 500;
+    }
+
+    /* ——— Main ——— */
+    main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      padding: 2.5rem 2rem 4rem;
+      max-width: 52rem;
+    }
+
+    header.doc-header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header.doc-header h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .doc-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .audience-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .audience-tags span {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(45, 212, 191, 0.35);
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    section h2 {
+      font-size: 1.35rem;
+      margin: 0 0 1rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    section:first-of-type h2 {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    section h3 {
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.65rem;
+      color: var(--text);
+    }
+
+    .summary-box {
+      background: var(--summary-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-box strong {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    .summary-box p {
+      margin: 0;
+      color: var(--text);
+    }
+
+    ul, ol {
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.35rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.65rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td {
+      background: rgba(26, 34, 44, 0.5);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.84em;
+      background: var(--surface);
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .mermaid-wrap {
+      margin: 1.25rem 0;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    .mermaid-fallback {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      white-space: pre-wrap;
+      margin: 0;
+      padding: 1rem;
+      background: var(--summary-bg);
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+    }
+
+    .mermaid-error .mermaid {
+      display: none;
+    }
+
+    details.for-po-detail {
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    details.for-po-detail summary {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    details.for-po-detail summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.for-po-detail summary::before {
+      content: "▸";
+      color: var(--accent);
+      transition: transform 0.15s;
+    }
+
+    details.for-po-detail[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    details.for-po-detail .detail-body {
+      padding: 0 1rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .flow-steps {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+    }
+
+    .flow-steps li {
+      position: relative;
+      padding-left: 2.25rem;
+      margin-bottom: 1rem;
+      counter-increment: step;
+    }
+
+    .flow-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .module-cards {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .module-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .module-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      background: var(--summary-bg);
+    }
+
+    .module-card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .module-card p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .module-card .route {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      color: var(--text);
+    }
+
+    footer.doc-footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .nav-toggle {
+        display: block;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        box-shadow: var(--shadow);
+      }
+
+      .sidebar.is-open {
+        transform: translateX(0);
+      }
+
+      main {
+        margin-left: 0;
+        padding: 3.5rem 1.25rem 3rem;
+        max-width: none;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+      }
+
+      .sidebar, .nav-toggle, .mode-toggle, .sidebar-backdrop {
+        display: none !important;
+      }
+
+      main {
+        margin: 0;
+        padding: 0;
+        max-width: none;
+      }
+
+      a {
+        color: #0066cc;
+        text-decoration: underline;
+      }
+
+      .summary-box {
+        border: 1px solid #ccc;
+        box-shadow: none;
+      }
+
+      details.for-po-detail {
+        border: 1px solid #ccc;
+      }
+
+      details.for-po-detail summary {
+        color: #333;
+      }
+
+      .mermaid-wrap {
+        border: 1px solid #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">К основному содержимому</a>
+  <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="sidebar">Меню</button>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+  <div class="layout">
+    <nav class="sidebar" id="sidebar" aria-label="Оглавление документа">
+      <p class="toc-title">Разделы</p>
+      <ul class="toc" id="toc">
+        <li><a href="#vision" class="is-active">Видение</a></li>
+        <li><a href="#philosophy">Философия</a></li>
+        <li><a href="#business-value">Бизнес-ценность</a></li>
+        <li><a href="#user-value">Ценность для пользователей</a></li>
+        <li><a href="#purpose">Назначение платформы</a></li>
+        <li><a href="#problem">Какую проблему решаем</a></li>
+        <li><a href="#user-journey">Путь пользователя</a></li>
+        <li><a href="#architecture">Архитектура (общая)</a></li>
+        <li><a href="#modules">Модули и экраны</a></li>
+        <li><a href="#references">Источники в репозитории</a></li>
+      </ul>
+      <button type="button" class="mode-toggle" id="modeToggle" aria-pressed="false" title="Скрыть блоки «Технические детали» для презентации CEO/CPO">
+        Режим: подробно (вкл. технику)
+      </button>
+    </nav>
+
+    <main id="main">
+      <header class="doc-header">
+        <h1>AUROSY Skill Factory</h1>
+        <p class="doc-meta">Документ для сооснователей · AUROSY Skill Factory (веб-клиент) · версия документа: 9 апреля 2026</p>
+        <div class="audience-tags" role="list">
+          <span role="listitem">CEO</span>
+          <span role="listitem">CPO (продукт и продажи)</span>
+          <span role="listitem">Технический Product Owner / разработчик</span>
+        </div>
+        <p style="margin-top:1.25rem;color:var(--muted);font-size:0.95rem;">Один файл HTML — откройте в браузере (Chrome и др.) через двойной клик или <code>file://</code>. Оглавление слева ведёт по разделам; переключатель внизу сайдбара скрывает технические подробности.</p>
+      </header>
+
+      <section id="vision" aria-labelledby="vision-heading">
+        <h2 id="vision-heading">Видение</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Сделать создание и доводку «скиллов» для человекоподобного робота доступным через единый понятный веб-центр: от описания движения и сценария до симуляции, обучения и упаковки результата — без необходимости держать в голове весь набор консольных инструментов.</p>
+        </div>
+        <p><strong>AUROSY Skill Factory</strong> в текущем репозитории — это <strong>монорепозиторий веб-клиента</strong> (SPA) этой платформы. В горизонте 1–3 лет видение — усилить роль «фабрики создателей»: команда и партнёры могут быстрее проходить цикл <em>задумал → описал → проверил → прогнал конвейер → поставил в очередь / получил пакет</em>, опираясь на один интерфейс и согласованные контракты с бэкендом.</p>
+        <details class="for-po-detail">
+          <summary>Технические детали</summary>
+          <div class="detail-body">
+            <p>Код SPA: каталог <code>web/frontend/</code>. Бэкенд (FastAPI, CLI, DDS) — <strong>отдельный репозиторий</strong>; граница — HTTP REST, WebSocket телеметрии и OpenAPI. Подробности слоя браузера: <a href="./g1-control-ui/01_frontend_architecture.md">01_frontend_architecture.md</a>.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="philosophy" aria-labelledby="philosophy-heading">
+        <h2 id="philosophy-heading">Философия продукта</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Инженерный инструмент, но с опорой на визуальную ясность: пользователь видит структуру задачи, статусы и логи, а не только сухие числа. Локальный «конвейер» и облачная/платформенная очередь задач явно разведены, чтобы не путать сценарии использования.</p>
+        </div>
+        <ul>
+          <li><strong>Визуальный центр управления.</strong> Цель UX — понятный центр (дашборд, Pose Studio, сценарии, конвейер), а не панель из одних метрик без контекста (см. продуктовый бриф в репозитории).</li>
+          <li><strong>Источник истины на сервере.</strong> Валидация Phase 0 и запуск тяжёлых шагов остаются за бэкендом; браузер не ходит в DDS напрямую и не исполняет CLI.</li>
+          <li><strong>Два пути к обучению.</strong> Синхронный pipeline (preprocess → playback → train) через API и асинхронная очередь Phase 5 (артефакты, jobs, пакеты) — оба первоклассные, с пояснениями в UI и справке.</li>
+          <li><strong>Доступность и снижение когнитивной нагрузки.</strong> Статусы не только цветом, фокус для клавиатуры, согласованные бейджи и подсказки (дорожная карта F9–F12 в документации UI).</li>
+        </ul>
+        <details class="for-po-detail">
+          <summary>Технические детали</summary>
+          <div class="detail-body">
+            <p>UX-принципы и визуальный референс: <a href="./g1-control-ui/04_figma_design_brief.md">04_figma_design_brief.md</a>, токены: <a href="./g1-control-ui/02_design_system.md">02_design_system.md</a>. Границы ответственности фронт/бэк: <a href="./g1-control-ui/01_frontend_architecture.md">01_frontend_architecture.md</a> §6.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="business-value" aria-labelledby="business-value-heading">
+        <h2 id="business-value-heading">Бизнес-ценность платформы</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Ускоряем time-to-skill: меньше трения между ролями, прозрачные этапы и возможность масштабировать обучение и выпуск пакетов через платформенную очередь и артефакты.</p>
+        </div>
+        <ul>
+          <li><strong>Скорость итераций.</strong> Один интерфейс для авторинга, оценки сценария, запуска конвейера и мониторинга задач сокращает переключения между инструментами и документацией.</li>
+          <li><strong>Снижение порога входа.</strong> Онбординг новых инженеров и продакт-ролей проще, когда потоки задокументированы в UI и в FAQ/справке (<code>/help</code>).</li>
+          <li><strong>Масштабирование через Phase 5.</strong> Сохранение JSON-артефактов, постановка асинхронного train, список jobs и выпуск Skill Bundle (пакеты) поддерживают сценарии «много задач / команда / последующая дистрибуция артефактов».</li>
+          <li><strong>Согласованность с контрактами API.</strong> Меньше риска «разъехавшихся» форматов между клиентом и сервисом за счёт валидации и OpenAPI на стороне бэкенда.</li>
+        </ul>
+        <details class="for-po-detail">
+          <summary>Технические детали</summary>
+          <div class="detail-body">
+            <p>Идентификация пользователя для Phase 5: заголовок <code>X-User-Id</code>, настройка через <code>VITE_PLATFORM_USER_ID</code> и UI настроек. См. корневой <a href="../README.md">README.md</a> монорепозитория и журналы F13–F17 в <a href="./g1-control-ui/03_implementation_roadmap_frontend.md">03_implementation_roadmap_frontend.md</a>.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="user-value" aria-labelledby="user-value-heading">
+        <h2 id="user-value-heading">Ценность для пользователей</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Инженеры и продвинутые операторы получают контроль над JSON Phase 0, позой, сценарием и конвейером в одном месте, с понятной обратной связью (валидация, логи, статусы задач, телеметрия).</p>
+        </div>
+        <ul>
+          <li>Редактирование и проверка <code>keyframes</code>, <code>motion</code>, <code>scenario</code> с серверной валидацией.</li>
+          <li>Pose Studio: визуал и управление углами суставов, согласованное с телеметрией.</li>
+          <li>Конструктор сценариев из mid-level действий с оценкой длительности и предупреждениями (целевое окно ~30 с).</li>
+          <li>Конвейер с логами preprocess / playback / train; перенос данных в форму задач платформы без «магического» автозапуска очереди.</li>
+          <li>Телеметрия в реальном времени по WebSocket.</li>
+          <li>Локализация RU/EN, справка и FAQ в приложении.</li>
+        </ul>
+        <details class="for-po-detail">
+          <summary>Технические детали</summary>
+          <div class="detail-body">
+            <p>Пользовательские вопросы: <a href="./g1-control-ui/FAQ.md">FAQ.md</a>. Назначение экранов: <a href="./g1-control-ui/01_frontend_architecture.md">01_frontend_architecture.md</a> §1 и §3.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="purpose" aria-labelledby="purpose-heading">
+        <h2 id="purpose-heading">Назначение платформы</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Это единый веб-интерфейс к циклу создания и доводки скиллов и сценариев поведения роботов (в т.ч. Unitree G1 в текущем стеке): описание, визуализация, сценарии, запуск вычислений и обучения через сервер, просмотр телеметрии и (в Phase 5) работа с артефактами и пакетами.</p>
+        </div>
+        <p>Веб-клиент <strong>не заменяет</strong> бэкенд: он не выполняет CLI локально в браузере и <strong>не подключается к DDS напрямую</strong> — только через FastAPI (REST и WebSocket). Пути к файлам в pipeline относятся к машине, где работает бэкенд (или данные передаются в теле запроса согласно OpenAPI).</p>
+      </section>
+
+      <section id="problem" aria-labelledby="problem-heading">
+        <h2 id="problem-heading">Какую проблему решаем</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Традиционно цепочка «описание движения → симуляция → обучение → артефакты» размазана по скриптам, конфигам и ручным шагам. Мы собираем ключевые шаги в согласованный UI с явными статусами и контрактами.</p>
+        </div>
+        <ul>
+          <li><strong>Фрагментированный toolchain.</strong> Сложно помнить порядок вызовов и где смотреть логи; конвейер в UI даёт единую точку запуска и отображения результата.</li>
+          <li><strong>Сложность Phase 0.</strong> JSON-схемы и единицы измерения требуют проверки; серверная валидация и подсказки снижают число «тихих» ошибок.</li>
+          <li><strong>Связка симуляции и обучения.</strong> Пользователю нужен предсказуемый путь от preprocess к train — и отдельно возможность вынести долгие задачи в очередь платформы.</li>
+          <li><strong>Наблюдаемость.</strong> Телеметрия суставов в одном окне с Pose Studio упрощает сопоставление «задали / фактически».</li>
+        </ul>
+      </section>
+
+      <section id="user-journey" aria-labelledby="user-journey-heading">
+        <h2 id="user-journey-heading">Путь пользователя</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Старт с главной: проверка связи с API и выбор направления — авторинг и сценарии, поза, конвейер или платформа (задачи и пакеты). В конце цепочки — при необходимости телеметрия; настройки и справка доступны в любой момент.</p>
+        </div>
+        <h3>Информационная архитектура (сайдбар)</h3>
+        <p>Порядок разделов в приложении: <strong>Главная</strong> → <strong>Авторинг</strong> → <strong>Pose Studio</strong> → <strong>Сценарии</strong> → <strong>Конвейер</strong> → группа <strong>Платформа (Phase 5): Задачи, Пакеты</strong> → <strong>Телеметрия</strong> → <strong>Справка</strong> → <strong>Настройки</strong>.</p>
+        <h3>Типовые маршруты</h3>
+        <ol class="flow-steps">
+          <li><strong>Главная (<code>/</code>).</strong> Статус API, кратко метаданные (<code>telemetry_mode</code> и др.), блок «два пути к train», шорткаты в разделы.</li>
+          <li><strong>Авторинг (<code>/authoring</code>).</strong> Редактирование JSON, валидация.</li>
+          <li><strong>Pose Studio (<code>/pose</code>).</strong> Визуал и суставы; при DDS-телеметрии — предупреждение в UI (рекомендации в FAQ/справке).</li>
+          <li><strong>Сценарии (<code>/scenarios</code>).</strong> Каталог действий, сборка нод, оценка длительности.</li>
+          <li><strong>Конвейер (<code>/pipeline</code>).</strong> Preprocess, playback, train; перенос reference в задачи платформы при необходимости.</li>
+          <li><strong>Задачи (<code>/jobs</code>, <code>/jobs/:jobId</code>).</strong> Артефакты, постановка train, мониторинг.</li>
+          <li><strong>Пакеты (<code>/packages</code>).</strong> Skill Bundle: список, скачивание, загрузка, публикация.</li>
+          <li><strong>Телеметрия (<code>/telemetry</code>).</strong> Подписка на поток состояния.</li>
+          <li><strong>Справка (<code>/help</code>) и Настройки (<code>/settings</code>).</strong> FAQ, язык, базовый URL API, идентификатор платформы.</li>
+        </ol>
+        <details class="for-po-detail">
+          <summary>Технические детали</summary>
+          <div class="detail-body">
+            <p>Маршруты заданы в <code>web/frontend/src/App.tsx</code>. Мост конвейер → задачи: <code>web/frontend/src/lib/jobsPipelineBridge.ts</code>.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="architecture" aria-labelledby="architecture-heading">
+        <h2 id="architecture-heading">Архитектура (общая)</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>В браузере — React SPA с модулями по фичам; общение с одним бэкендом через REST и WebSocket. Бэкенд поднимает API, мост к CLI и поток телеметрии.</p>
+        </div>
+        <div class="mermaid-wrap" id="mermaidRoot">
+          <div class="mermaid">flowchart TB
+subgraph browser["Браузер"]
+routes["Маршруты"]
+featAuthoring["Авторинг"]
+featPose["Pose"]
+featScenario["Сценарии"]
+featPipeline["Конвейер"]
+featJobs["Задачи Phase5"]
+featTelem["Телеметрия"]
+state["Черновики"]
+routes --> featAuthoring
+routes --> featPose
+routes --> featScenario
+routes --> featPipeline
+routes --> featJobs
+routes --> featTelem
+featAuthoring --> state
+featScenario --> state
+end
+subgraph clients["Клиенты"]
+rest["REST"]
+ws["WebSocket"]
+end
+subgraph backend["FastAPI"]
+api["REST API"]
+wss["WS"]
+cli["CLI мост"]
+end
+featAuthoring --> rest
+featScenario --> rest
+featPipeline --> rest
+featJobs --> rest
+featTelem --> ws
+featPose --> rest
+rest --> api
+ws --> wss
+api --> cli</div>
+          <p class="mermaid-fallback" id="mermaidFallback" hidden>Браузер: модули (авторинг, поза, сценарии, конвейер, задачи, телеметрия) → REST и WebSocket → FastAPI (REST, WS, вызов CLI). Локальные черновики JSON — в браузере; валидация Phase 0 и запуск процессов — на сервере.</p>
+        </div>
+        <ul>
+          <li><strong>REST:</strong> единая обёртка над <code>fetch</code>, базовый URL из env или прокси Vite в разработке.</li>
+          <li><strong>WebSocket:</strong> <code>/ws/telemetry</code>, по одному JSON-событию на сообщение.</li>
+          <li><strong>Состояние:</strong> черновики авторинга, ноды сценария, флаги UI; персистентность на диск опциональна в будущем.</li>
+        </ul>
+      </section>
+
+      <section id="modules" aria-labelledby="modules-heading">
+        <h2 id="modules-heading">Модули и экраны</h2>
+        <div class="summary-box">
+          <strong>Коротко</strong>
+          <p>Ниже — фиче-модули уровня продукта и их роль; в карточках указаны типичные API (полный перечень — OpenAPI бэкенда).</p>
+        </div>
+
+        <h3>Сводная таблица</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Модуль</th>
+              <th>Зачем нужен</th>
+              <th>Ключевые данные / API</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Authoring</strong></td>
+              <td>Редактирование и проверка описания движения Phase 0 (keyframes, motion, scenario).</td>
+              <td><code>POST /api/validate</code>; схемы в <code>web/frontend/public/contracts/</code></td>
+            </tr>
+            <tr>
+              <td><strong>Pose / visualization</strong></td>
+              <td>Визуальный контроль позы робота рядом с управлением углами.</td>
+              <td><code>GET /api/joints</code>; опционально сопоставление с телеметрией</td>
+            </tr>
+            <tr>
+              <td><strong>Scenario builder</strong></td>
+              <td>Сборка сценария из библиотеки действий и оценка времени.</td>
+              <td><code>GET /api/mid-level/actions</code>, <code>POST /api/scenario/estimate</code></td>
+            </tr>
+            <tr>
+              <td><strong>Pipeline</strong></td>
+              <td>Запуск preprocess → playback → train на стороне бэкенда, просмотр логов и результатов.</td>
+              <td><code>POST /api/pipeline/preprocess|playback|train</code>, <code>GET /api/pipeline/detect-cli</code></td>
+            </tr>
+            <tr>
+              <td><strong>Platform jobs</strong></td>
+              <td>Артефакты, очередь обучения, статусы и логи задач (Phase 5).</td>
+              <td><code>POST /api/platform/artifacts/{name}</code>, <code>POST /api/jobs/train</code>, <code>GET /api/jobs</code>, <code>GET /api/jobs/{job_id}</code></td>
+            </tr>
+            <tr>
+              <td><strong>Telemetry</strong></td>
+              <td>Живое отображение состояния суставов.</td>
+              <td>WebSocket <code>/ws/telemetry</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Карточки модулей и оболочки</h3>
+        <div class="module-cards">
+          <div class="module-card">
+            <h3>Главная (Dashboard)</h3>
+            <p>Входная точка: здоровье API, мета, выбор между синхронным конвейером и платформенными задачами, быстрые переходы.</p>
+            <p class="route">/</p>
+          </div>
+          <div class="module-card">
+            <h3>Авторинг</h3>
+            <p>JSON Phase 0, валидация, понятные ошибки для исправления.</p>
+            <p class="route">/authoring</p>
+          </div>
+          <div class="module-card">
+            <h3>Pose Studio</h3>
+            <p>2D-схема и слайдеры по группам тела; связь с телеметрией при необходимости.</p>
+            <p class="route">/pose</p>
+          </div>
+          <div class="module-card">
+            <h3>Сценарии</h3>
+            <p>Таблица действий, цепочка нод, оценка длительности, предупреждения по целевому окну.</p>
+            <p class="route">/scenarios</p>
+          </div>
+          <div class="module-card">
+            <h3>Конвейер</h3>
+            <p>Три этапа с формами и консолью логов; связь с задачами платформы для переноса reference.</p>
+            <p class="route">/pipeline</p>
+          </div>
+          <div class="module-card">
+            <h3>Задачи (Phase 5)</h3>
+            <p>Именованные артефакты, постановка train, polling статуса, детали job.</p>
+            <p class="route">/jobs · /jobs/:jobId</p>
+          </div>
+          <div class="module-card">
+            <h3>Пакеты</h3>
+            <p>Skill Bundle: список, скачивание, загрузка, публикация; выпуск из успешного job.</p>
+            <p class="route">/packages</p>
+          </div>
+          <div class="module-card">
+            <h3>Телеметрия</h3>
+            <p>Поток WS, слайдеры/таблица, согласованность группировки с Pose Studio.</p>
+            <p class="route">/telemetry</p>
+          </div>
+          <div class="module-card">
+            <h3>Справка</h3>
+            <p>Встроенный FAQ и пояснения по потокам (в т.ч. конвейер vs платформа).</p>
+            <p class="route">/help</p>
+          </div>
+          <div class="module-card">
+            <h3>Настройки</h3>
+            <p>Базовый URL API, язык, user id для платформы, ссылки на документацию репозитория.</p>
+            <p class="route">/settings</p>
+          </div>
+        </div>
+
+        <h3>Потоки данных (кратко)</h3>
+        <ol>
+          <li>Авторинг: JSON → при необходимости клиентская схема → <code>POST /api/validate</code>.</li>
+          <li>Сценарий: список действий → сборка нод → <code>POST /api/scenario/estimate</code>.</li>
+          <li>Конвейер: пути на хосте бэкенда или JSON в теле → subprocess → логи в UI.</li>
+          <li>Платформа: сохранить артефакт → поставить train → опрос <code>GET /api/jobs/{id}</code> до завершения.</li>
+          <li>Телеметрия: одно WS-соединение, обновление UI.</li>
+        </ol>
+
+        <details class="for-po-detail">
+          <summary>Технические детали</summary>
+          <div class="detail-body">
+            <p>Пути к документам бэкенда: <a href="./g1-control-ui/backend_references.md">backend_references.md</a>. OpenAPI: <code>GET http://&lt;host&gt;:8000/docs</code> при запущенном сервере. Дорожная карта фронта: <a href="./g1-control-ui/03_implementation_roadmap_frontend.md">03_implementation_roadmap_frontend.md</a>.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="references" aria-labelledby="references-heading">
+        <h2 id="references-heading">Источники в репозитории</h2>
+        <ul>
+          <li><a href="../README.md">README.md</a> — обзор монорепозитория и журнал фаз.</li>
+          <li><a href="./g1-control-ui/README.md">docs/g1-control-ui/README.md</a> — индекс документации UI.</li>
+          <li><a href="./g1-control-ui/01_frontend_architecture.md">01_frontend_architecture.md</a> — модули и потоки.</li>
+          <li><a href="./g1-control-ui/FAQ.md">FAQ.md</a> — вопросы пользователей.</li>
+          <li><a href="./g1-control-ui/DEPLOYMENT.md">DEPLOYMENT.md</a> — развёртывание.</li>
+        </ul>
+      </section>
+
+      <footer class="doc-footer">
+        <p>Документ согласован с состоянием репозитория AUROSY Skill Factory (веб-клиент) на дату в шапке. При расхождении с кодом приоритет у исходников и <code>docs/g1-control-ui/</code>.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js" crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      var sidebar = document.getElementById("sidebar");
+      var toggle = document.getElementById("navToggle");
+      var backdrop = document.getElementById("sidebarBackdrop");
+      var tocLinks = document.querySelectorAll("#toc a");
+      var sections = document.querySelectorAll("main section[id]");
+      var modeBtn = document.getElementById("modeToggle");
+      var mermaidRoot = document.getElementById("mermaidRoot");
+      var mermaidFallback = document.getElementById("mermaidFallback");
+
+      function closeSidebar() {
+        sidebar.classList.remove("is-open");
+        backdrop.classList.remove("is-open");
+        backdrop.hidden = true;
+        toggle.setAttribute("aria-expanded", "false");
+      }
+
+      function openSidebar() {
+        sidebar.classList.add("is-open");
+        backdrop.classList.add("is-open");
+        backdrop.hidden = false;
+        toggle.setAttribute("aria-expanded", "true");
+      }
+
+      toggle.addEventListener("click", function () {
+        if (sidebar.classList.contains("is-open")) closeSidebar();
+        else openSidebar();
+      });
+
+      backdrop.addEventListener("click", closeSidebar);
+
+      tocLinks.forEach(function (link) {
+        link.addEventListener("click", function () {
+          if (window.matchMedia("(max-width: 900px)").matches) closeSidebar();
+        });
+      });
+
+      /* Active section in TOC */
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var id = entry.target.getAttribute("id");
+            tocLinks.forEach(function (a) {
+              a.classList.toggle("is-active", a.getAttribute("href") === "#" + id);
+            });
+          });
+        },
+        { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+      );
+
+      sections.forEach(function (sec) {
+        observer.observe(sec);
+      });
+
+      /* Compact / detailed mode */
+      var compact = false;
+      modeBtn.addEventListener("click", function () {
+        compact = !compact;
+        document.body.classList.toggle("compact", compact);
+        modeBtn.setAttribute("aria-pressed", compact ? "true" : "false");
+        modeBtn.textContent = compact
+          ? "Режим: компактно (без техники)"
+          : "Режим: подробно (вкл. технику)";
+      });
+
+      /* Mermaid */
+      function showMermaidFallback() {
+        if (mermaidRoot && mermaidFallback) {
+          mermaidRoot.classList.add("mermaid-error");
+          mermaidFallback.hidden = false;
+        }
+      }
+
+      if (typeof mermaid !== "undefined") {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: "dark",
+          securityLevel: "strict",
+          flowchart: { htmlLabels: true, curve: "basis" }
+        });
+        setTimeout(function () {
+          var svg = mermaidRoot && mermaidRoot.querySelector("svg");
+          if (!svg) showMermaidFallback();
+        }, 4000);
+      } else {
+        showMermaidFallback();
+      }
+
+      /* Print: expand technical details */
+      window.addEventListener("beforeprint", function () {
+        document.querySelectorAll("details.for-po-detail").forEach(function (d) {
+          d.setAttribute("open", "");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
