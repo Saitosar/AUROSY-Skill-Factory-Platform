@@ -27,7 +27,7 @@ import {
 
 const FALLBACK_JOINT_MAP = defaultJointMapFromSkillKeys();
 
-const MAX_SAVED_WASM_POSES = 2;
+const MAX_SAVED_WASM_POSES = 3;
 const WASM_MOTION_SPEED_RAD_S = 0.5;
 const MIN_MOTION_SEGMENT_SEC = 0.05;
 const KEYFRAME_TIMESTAMP_STEP_S = 0.5;
