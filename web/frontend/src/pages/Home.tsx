@@ -14,7 +14,6 @@ const shortcuts = [
   { to: "/pipeline", titleKey: "home.shortcut.pipelineTitle", descKey: "home.shortcut.pipelineDesc" },
   { to: "/jobs", titleKey: "home.shortcut.jobsTitle", descKey: "home.shortcut.jobsDesc" },
   { to: "/packages", titleKey: "home.shortcut.packagesTitle", descKey: "home.shortcut.packagesDesc" },
-  { to: "/telemetry", titleKey: "home.shortcut.telemetryTitle", descKey: "home.shortcut.telemetryDesc" },
   { to: "/help", titleKey: "home.shortcut.helpTitle", descKey: "home.shortcut.helpDesc" },
 ] as const;
 

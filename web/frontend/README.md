@@ -31,7 +31,7 @@ npm run dev
 
 - **Сборка:** для бандла MuJoCo используется целевой уровень **ES2022** (top-level `await` в worker). См. `vite.config.ts`.
 
-- **Экспорт keyframes:** углы из симуляции маппятся на те же ключи, что и `JOINT_MAP` на бэкенде (`src/mujoco/jointMapping.ts`, `qposToSkillAngles.ts`); экспорт в Авторинг — через `poseAuthoringBridge` как и для телеметрии.
+- **Экспорт keyframes:** углы из симуляции приводятся к Phase 0 `joints_deg` с ключами `"0"`…`"28"` (`src/lib/poseAuthoringBridge.ts`, маппинг суставов — `src/mujoco/jointMapping.ts`); в режиме 3D можно добавить до двух сохранённых поз и скачать отдельно SDK-файл `pose.json`. Экспорт в Авторинг — через `poseAuthoringBridge`, как и для телеметрии.
 
 ## Базовый URL API (`VITE_API_BASE`)
 

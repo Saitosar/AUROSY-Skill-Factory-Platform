@@ -18,6 +18,8 @@ function clampRad(r: number, lo: number, hi: number): number {
 export type JointAngleRowProps = {
   jointIndex: number;
   label: string;
+  /** In expert mode, shown in monospace instead of `label` when set (e.g. canonical skill key). */
+  expertCanonicalLabel?: string;
   valueRad: number;
   minRad: number;
   maxRad: number;
@@ -35,6 +37,7 @@ export type JointAngleRowProps = {
 export default function JointAngleRow({
   jointIndex,
   label,
+  expertCanonicalLabel,
   valueRad,
   minRad,
   maxRad,
@@ -84,7 +87,7 @@ export default function JointAngleRow({
       <div className="joint-slider-row-label" id={labelId}>
         {expert && (
           <span className="joint-slider-expert muted">
-            {jointIndex} · <span className="mono">{label}</span>
+            {jointIndex} · <span className="mono">{expertCanonicalLabel ?? label}</span>
           </span>
         )}
         {!expert && <span>{label}</span>}

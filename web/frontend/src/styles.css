@@ -59,13 +59,14 @@ select:focus:not(:focus-visible) {
 
 a:focus-visible,
 button:focus-visible,
+.sidebar-collapse-btn:focus-visible,
+.sidebar-floating-open:focus-visible,
 .lang-switch-btn:focus-visible,
 .tabs button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 .home-shortcut-card:focus-visible,
-.backend-banner-retry:focus-visible,
 .home-status-retry:focus-visible {
   outline: var(--focus-ring-width) solid var(--focus-ring-color);
   outline-offset: var(--focus-ring-offset);
@@ -90,12 +91,75 @@ select:focus-visible,
 }
 
 .sidebar {
-  width: 272px;
+  width: 212px;
   flex-shrink: 0;
-  padding: calc(var(--space-step) * 4);
+  padding: calc(var(--space-step) * 3);
   background: color-mix(in srgb, var(--bg-surface) 55%, var(--bg-elevated));
   border-right: 1px solid var(--border-strong);
   box-shadow: 1px 0 0 rgba(0, 0, 0, 0.2);
+  transition:
+    width 0.2s ease,
+    padding 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.layout--sidebar-collapsed .sidebar {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border-right-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sidebar-collapse-btn {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.sidebar-collapse-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.sidebar-floating-open {
+  position: fixed;
+  left: 0;
+  top: 12px;
+  z-index: 100;
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  border: 1px solid var(--border-strong);
+  border-left: none;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.sidebar-floating-open:hover {
+  filter: brightness(1.08);
 }
 
 @supports (backdrop-filter: blur(12px)) {
@@ -106,8 +170,9 @@ select:focus-visible,
 }
 
 .sidebar h1 {
-  font-size: 1rem;
-  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  margin: 0;
   font-weight: 600;
 }
 
@@ -142,7 +207,9 @@ select:focus-visible,
 
 .sidebar nav a {
   display: block;
-  padding: 8px 10px;
+  padding: 5px 8px;
+  font-size: 0.8125rem;
+  line-height: 1.35;
   border-radius: var(--radius-control);
   color: var(--text-muted);
 }
@@ -493,48 +560,32 @@ select:focus-visible,
   width: 100%;
 }
 
-main:has(.pose-studio-page) {
+.layout-content main:has(.pose-studio-page) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   max-width: min(1600px, 100%);
+  padding-top: 12px;
+  padding-bottom: 16px;
+  overflow: hidden;
+}
+
+.pose-studio-page {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.pose-studio-page .page-header {
+  flex-shrink: 0;
 }
 
 .pose-studio-page .page-header-desc {
   max-width: none;
   width: 100%;
-}
-
-.backend-banner {
-  flex-shrink: 0;
-  padding: 10px 24px;
-  background: color-mix(in srgb, var(--color-destructive) 14%, var(--bg-default));
-  border-bottom: 1px solid var(--color-destructive);
-}
-
-.backend-banner-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.backend-banner-detail {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  flex: 1;
-  min-width: 200px;
-}
-
-.backend-banner-retry {
-  padding: 6px 14px;
-  border-radius: var(--radius-control);
-  border: 1px solid var(--border-strong);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 0.875rem;
-}
-
-.backend-banner-retry:hover {
-  filter: brightness(1.08);
 }
 
 h2 {
@@ -1063,9 +1114,16 @@ table.data td.num {
 /* Pose Studio (F4) */
 .pose-studio-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, min(380px, 100%));
+  /* minmax(0,1fr) lets the row shrink below content min-size so overflow/scroll can apply */
+  grid-template-rows: minmax(0, 1fr);
   gap: 20px;
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 @media (max-width: 960px) {
@@ -1078,10 +1136,13 @@ table.data td.num {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
 .pose-studio-visual {
-  min-height: 280px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .pose-studio-sidebar {
@@ -1089,23 +1150,45 @@ table.data td.num {
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  max-width: 380px;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
-.pose-studio-page .pose-studio-sidebar > .panel,
-.pose-studio-page .pose-studio-sidebar > .pose-studio-toolbar.panel {
+.pose-studio-sidebar .pose-studio-toolbar {
+  flex-shrink: 0;
+  width: 100%;
   margin-bottom: 0;
 }
 
-.pose-studio-page .pose-studio-sidebar .pose-studio-panel {
-  max-height: none;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
+.pose-studio-page .joint-slider-row {
+  grid-template-columns: minmax(96px, 1fr) minmax(100px, 2fr) auto;
 }
 
-.pose-studio-panel {
-  max-height: min(70vh, 720px);
+.pose-studio-page .pose-studio-sidebar > .panel {
+  margin-bottom: 0;
+}
+
+.pose-studio-sidebar-status {
+  flex-shrink: 0;
+  padding: 12px;
+}
+
+.pose-studio-layout > .pose-studio-visual,
+.pose-studio-layout > .pose-studio-sidebar {
+  min-height: 0;
+}
+
+.pose-studio-page .pose-studio-sidebar .pose-studio-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  /* Cap height: grid/flex %, viewport, or px — ensures scroll when joint list is long */
+  max-height: min(100%, 72vh, 720px);
+  max-height: min(100%, 72dvh, 720px);
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
 .pose-studio-ws {
@@ -1122,10 +1205,6 @@ table.data td.num {
   align-items: center;
   gap: 12px 16px;
   margin-bottom: 16px;
-}
-
-.pose-studio-page .pose-studio-sidebar .pose-studio-toolbar {
-  margin-bottom: 0;
 }
 
 .pose-studio-toolbar .tabs {
@@ -1154,24 +1233,35 @@ table.data td.num {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 280px;
+  min-height: 0;
 }
 
-/* 3D MuJoCo: R3F Canvas + absolutely positioned canvas need a definite block height; flex/grid min-content can be 0. */
+/* 3D MuJoCo: R3F Canvas + absolutely positioned canvas fill the grid cell. */
 .pose-studio-visual--wasm {
-  min-height: min(52vh, 680px);
+  min-height: 0;
+  flex: 1;
+}
+
+/* Half the grid row height — full stretch was too tall on large viewports */
+.pose-studio-page .pose-studio-visual--wasm {
+  flex: unset;
+  height: 50%;
+  max-height: 50%;
+  align-self: start;
+  width: 100%;
 }
 
 .pose-studio-visual--wasm .pose-studio-wasm-host {
-  min-height: min(48vh, 620px);
-  height: min(48vh, 620px);
+  min-height: 0;
+  height: 100%;
+  flex: 1;
 }
 
 .mujoco-g1-viewer {
   flex: 1;
   width: 100%;
-  height: min(48vh, 620px);
-  min-height: min(48vh, 620px);
+  min-height: 0;
+  height: 100%;
   position: relative;
 }
 

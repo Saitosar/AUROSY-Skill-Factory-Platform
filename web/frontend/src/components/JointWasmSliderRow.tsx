@@ -4,6 +4,7 @@ import type { DisplayUnit } from "../lib/jointRowDisplay";
 export type JointWasmSliderRowProps = {
   jointIndex: number;
   label: string;
+  expertCanonicalLabel?: string;
   skillKey: string;
   valueRad: number;
   minRad: number;
@@ -19,6 +20,7 @@ export type JointWasmSliderRowProps = {
 export default function JointWasmSliderRow({
   jointIndex,
   label,
+  expertCanonicalLabel,
   skillKey,
   valueRad,
   minRad,
@@ -34,6 +36,7 @@ export default function JointWasmSliderRow({
     <JointAngleRow
       jointIndex={jointIndex}
       label={label}
+      expertCanonicalLabel={expertCanonicalLabel}
       valueRad={valueRad}
       minRad={minRad}
       maxRad={maxRad}

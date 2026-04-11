@@ -5,7 +5,6 @@ const FAQ_SECTIONS: { id: string; count: number }[] = [
   { id: "api", count: 4 },
   { id: "authoring", count: 3 },
   { id: "pose", count: 2 },
-  { id: "telemetry", count: 4 },
   { id: "scenario", count: 1 },
   { id: "pipeline", count: 3 },
   { id: "deployment", count: 5 },
