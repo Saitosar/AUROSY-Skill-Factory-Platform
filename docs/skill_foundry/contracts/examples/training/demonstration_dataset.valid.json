@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "robot_model": "g1_29dof",
+  "sampling_hz": 200,
+  "obs_schema_ref": "manifest_obs_v1",
+  "simulator": "mujoco",
+  "simulator_commit": "abc1234",
+  "seed": 7,
+  "episodes": [
+    {
+      "episode_id": "ep_0001",
+      "steps": [
+        {
+          "obs": [0.0, 0.1, 0.2],
+          "act": [0.1, 0.1, 0.1],
+          "done": false
+        },
+        {
+          "obs": [0.2, 0.3, 0.4],
+          "act": [0.1, 0.1, 0.1],
+          "done": true
+        }
+      ]
+    }
+  ]
+}
+

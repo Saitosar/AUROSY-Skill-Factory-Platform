@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "robot_model": "g1_29dof",
+  "units": {
+    "angle": "radians",
+    "time": "seconds"
+  },
+  "frequency_hz": 50,
+  "root_model": "root_not_in_reference",
+  "joint_order": ["0", "1", "2"],
+  "joint_positions": [
+    [0.0, 0.1, -0.1],
+    [0.1, 0.2, -0.2],
+    [0.2, 0.3, -0.3]
+  ],
+  "joint_velocities": [
+    [0.0, 0.0, 0.0],
+    [5.0, 5.0, -5.0],
+    [5.0, 5.0, -5.0]
+  ],
+  "metadata": {
+    "episode_length": 3,
+    "mjcf_hash": "dummy_hash_for_example"
+  }
+}
+

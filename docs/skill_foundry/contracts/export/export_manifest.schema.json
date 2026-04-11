@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-foundry/export/export-manifest-v1",
+  "title": "Skill Foundry export manifest v1",
+  "type": "object",
+  "required": [
+    "package_version",
+    "manifest_schema_ref",
+    "observation",
+    "action",
+    "control",
+    "robot",
+    "joint_order",
+    "weights"
+  ],
+  "properties": {
+    "package_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$",
+      "description": "Semver of the export package format."
+    },
+    "manifest_schema_ref": {
+      "const": "skill_foundry_export_manifest_v1"
+    },
+    "observation": {
+      "type": "object",
+      "required": ["obs_schema_ref", "vector_dim", "blocks", "normalization"],
+      "properties": {
+        "obs_schema_ref": { "type": "string", "minLength": 1 },
+        "vector_dim": { "type": "integer", "minimum": 1 },
+        "normalization": {
+          "type": "string",
+          "enum": ["none"]
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "offset", "length"],
+            "properties": {
+              "name": { "type": "string" },
+              "offset": { "type": "integer", "minimum": 0 },
+              "length": { "type": "integer", "minimum": 1 }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "action": {
+      "type": "object",
+      "required": ["space", "dim", "low", "high", "residual_scale_rad"],
+      "properties": {
+        "space": { "const": "box" },
+        "dim": { "type": "integer", "minimum": 1 },
+        "low": { "type": "number" },
+        "high": { "type": "number" },
+        "residual_scale_rad": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "control": {
+      "type": "object",
+      "required": ["dt_s", "kp", "kd"],
+      "properties": {
+        "dt_s": { "type": "number", "exclusiveMinimum": 0 },
+        "kp": { "type": "number" },
+        "kd": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "robot": {
+      "type": "object",
+      "required": ["profile", "mjcf_sha256"],
+      "properties": {
+        "profile": { "type": "string", "minLength": 1 },
+        "robot_model": { "type": "string" },
+        "mjcf_path": { "type": "string" },
+        "mjcf_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": true
+    },
+    "joint_order": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "reference_trajectory": {
+      "type": "object",
+      "required": ["filename"],
+      "properties": {
+        "filename": { "type": "string", "minLength": 1 },
+        "schema_ref": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "weights": {
+      "type": "object",
+      "required": ["format", "filename"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["stable_baselines3_ppo_zip"]
+        },
+        "filename": { "type": "string", "minLength": 1 },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 of the weights file (SB3 zip) for tamper detection at load time."
+        }
+      },
+      "additionalProperties": false
+    },
+    "policy_weights_pt": {
+      "type": "object",
+      "required": ["filename"],
+      "properties": {
+        "filename": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "onnx": {
+      "type": ["object", "null"],
+      "properties": {
+        "filename": { "type": "string" },
+        "opset": { "type": "integer", "minimum": 1 },
+        "input_name": { "type": "string" },
+        "output_name": { "type": "string" },
+        "obs_dim": { "type": "integer", "minimum": 1 },
+        "action_dim": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "reference_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "train_config_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "train_run_checkpoint": { "type": "string" },
+        "phase": { "type": "string" },
+        "torch_version": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "product_validation": {
+      "type": "object",
+      "description": "Phase 6.1 summary from validation_report.json (optional).",
+      "required": ["filename"],
+      "properties": {
+        "filename": { "type": "string", "const": "validation_report.json" },
+        "validation_report_schema_ref": { "type": "string" },
+        "applicable": { "type": "boolean" },
+        "passed": { "type": "boolean" },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

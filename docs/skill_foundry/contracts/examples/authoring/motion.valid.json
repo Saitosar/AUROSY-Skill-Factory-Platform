@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "motion_id": "lezginka_kf_demo_v1",
+  "source_keyframes_id": "lezginka_kf_source_v1",
+  "keyframe_timestamps_s": [0.0, 0.5, 1.0],
+  "metadata": {
+    "name": "Lezginka demo motion"
+  }
+}
+

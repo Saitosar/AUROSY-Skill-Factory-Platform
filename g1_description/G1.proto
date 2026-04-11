@@ -1,0 +1,1445 @@
+#VRML_SIM R2025a utf8
+# license: Apache License 2.0
+# license url: http://www.apache.org/licenses/LICENSE-2.0
+# This is a proto file for Webots for the G1
+# Extracted from: /Users/sarkhan/unitree_ros/robots/g1_description/g1_29dof.urdf
+
+PROTO G1 [
+  field  SFVec3f     translation     0 0 0
+  field  SFRotation  rotation        0 0 1 0
+  field  SFString    name            "G1"  # Is `Robot.name`.
+  field  SFString    controller      "void" # Is `Robot.controller`.
+  field  MFString    controllerArgs  []     # Is `Robot.controllerArgs`.
+  field  SFString    customData      ""     # Is `Robot.customData`.
+  field  SFBool      supervisor      FALSE  # Is `Robot.supervisor`.
+  field  SFBool      synchronization TRUE   # Is `Robot.synchronization`.
+  field  SFBool      selfCollision   FALSE  # Is `Robot.selfCollision`.
+]
+{
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    controller IS controller
+    controllerArgs IS controllerArgs
+    customData IS customData
+    supervisor IS supervisor
+    synchronization IS synchronization
+    selfCollision IS selfCollision
+    children [
+      Shape {
+        appearance DEF dark PBRAppearance {
+          baseColor 0.500000 0.500000 0.500000
+          roughness 1.000000
+          metalness 0
+        }
+        geometry DEF pelvis Mesh {
+          url "meshes/pelvis.STL"
+        }
+      }
+      Solid {
+        children [
+          Shape {
+            appearance DEF white PBRAppearance {
+              baseColor 0.500000 0.500000 0.500000
+              roughness 1.000000
+              metalness 0
+            }
+            geometry DEF pelvis_contour_link Mesh {
+              url "meshes/pelvis_contour_link.STL"
+            }
+          }
+        ]
+        name "pelvis_contour_link"
+        boundingObject USE pelvis_contour_link
+        physics Physics {
+          density -1
+          mass 0.001000
+          centerOfMass [ 0.000000 0.000000 0.000000 ]
+          inertiaMatrix [
+            1.000000e-07 1.000000e-07 1.000000e-07
+            0.000000e+00 0.000000e+00 0.000000e+00
+          ]
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0.000000 1.000000 0.000000
+          anchor 0.000000 0.064452 -0.102700
+        }
+        device [
+          RotationalMotor {
+            name "left_hip_pitch_joint"
+            maxVelocity 32.0
+            minPosition -2.5307
+            maxPosition 2.8798
+            maxTorque 88.0
+          }
+          PositionSensor {
+            name "left_hip_pitch_joint_sensor"
+          }
+        ]
+        endPoint Solid {
+          translation 0.000000 0.064452 -0.102700
+          children [
+            Shape {
+              appearance USE dark
+              geometry DEF left_hip_pitch_link Mesh {
+                url "meshes/left_hip_pitch_link.STL"
+              }
+            }
+            HingeJoint {
+              jointParameters HingeJointParameters {
+                axis 0.984744 0.000000 0.174010
+                anchor 0.000000 0.052000 -0.030465
+              }
+              device [
+                RotationalMotor {
+                  name "left_hip_roll_joint"
+                  maxVelocity 32.0
+                  minPosition -0.5236
+                  maxPosition 2.9671
+                  maxTorque 88.0
+                }
+                PositionSensor {
+                  name "left_hip_roll_joint_sensor"
+                }
+              ]
+              endPoint Solid {
+                translation 0.000000 0.052000 -0.030465
+                rotation 0.000000 -1.000000 0.000000 0.174900
+                children [
+                  Shape {
+                    appearance USE white
+                    geometry DEF left_hip_roll_link Mesh {
+                      url "meshes/left_hip_roll_link.STL"
+                    }
+                  }
+                  HingeJoint {
+                    jointParameters HingeJointParameters {
+                      axis 0.000000 0.000000 1.000000
+                      anchor 0.025001 0.000000 -0.124120
+                    }
+                    device [
+                      RotationalMotor {
+                        name "left_hip_yaw_joint"
+                        maxVelocity 32.0
+                        minPosition -2.7576
+                        maxPosition 2.7576
+                        maxTorque 88.0
+                      }
+                      PositionSensor {
+                        name "left_hip_yaw_joint_sensor"
+                      }
+                    ]
+                    endPoint Solid {
+                      translation 0.025001 0.000000 -0.124120
+                      children [
+                        Shape {
+                          appearance USE white
+                          geometry DEF left_hip_yaw_link Mesh {
+                            url "meshes/left_hip_yaw_link.STL"
+                          }
+                        }
+                        HingeJoint {
+                          jointParameters HingeJointParameters {
+                            axis 0.000000 1.000000 0.000000
+                            anchor -0.078273 0.002149 -0.177340
+                          }
+                          device [
+                            RotationalMotor {
+                              name "left_knee_joint"
+                              maxVelocity 20.0
+                              minPosition -0.087267
+                              maxPosition 2.8798
+                              maxTorque 139.0
+                            }
+                            PositionSensor {
+                              name "left_knee_joint_sensor"
+                            }
+                          ]
+                          endPoint Solid {
+                            translation -0.078273 0.002149 -0.177340
+                            rotation 0.000000 1.000000 0.000000 0.174900
+                            children [
+                              Shape {
+                                appearance USE white
+                                geometry DEF left_knee_link Mesh {
+                                  url "meshes/left_knee_link.STL"
+                                }
+                              }
+                              HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  axis 0.000000 1.000000 0.000000
+                                  anchor 0.000000 -0.000094 -0.300010
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "left_ankle_pitch_joint"
+                                    maxVelocity 30.0
+                                    minPosition -0.87267
+                                    maxPosition 0.5236
+                                    maxTorque 35.0
+                                  }
+                                  PositionSensor {
+                                    name "left_ankle_pitch_joint_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  translation 0.000000 -0.000094 -0.300010
+                                  children [
+                                    Shape {
+                                      appearance USE white
+                                      geometry DEF left_ankle_pitch_link Mesh {
+                                        url "meshes/left_ankle_pitch_link.STL"
+                                      }
+                                    }
+                                    HingeJoint {
+                                      jointParameters HingeJointParameters {
+                                        anchor 0.000000 0.000000 -0.017558
+                                      }
+                                      device [
+                                        RotationalMotor {
+                                          name "left_ankle_roll_joint"
+                                          maxVelocity 30.0
+                                          minPosition -0.2618
+                                          maxPosition 0.2618
+                                          maxTorque 35.0
+                                        }
+                                        PositionSensor {
+                                          name "left_ankle_roll_joint_sensor"
+                                        }
+                                      ]
+                                      endPoint Solid {
+                                        translation 0.000000 0.000000 -0.017558
+                                        children [
+                                          Shape {
+                                            appearance USE dark
+                                            geometry DEF left_ankle_roll_link Mesh {
+                                              url "meshes/left_ankle_roll_link.STL"
+                                            }
+                                          }
+                                        ]
+                                        name "left_ankle_roll_link"
+                                        boundingObject Group {
+                                          children [
+                                            Pose {
+                                              translation -0.050000 0.025000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                            Pose {
+                                              translation -0.050000 -0.025000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                            Pose {
+                                              translation 0.120000 0.030000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                            Pose {
+                                              translation 0.120000 -0.030000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        physics Physics {
+                                          density -1
+                                          mass 0.608000
+                                          centerOfMass [ 0.026505 0.000000 -0.016425 ]
+                                          inertiaMatrix [
+                                            2.231000e-04 1.616100e-03 1.666700e-03
+                                            2.000000e-07 8.910000e-05 -1.000000e-07
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                  name "left_ankle_pitch_link"
+                                  boundingObject USE left_ankle_pitch_link
+                                  physics Physics {
+                                    density -1
+                                    mass 0.074000
+                                    centerOfMass [ -0.007269 0.000000 0.011137 ]
+                                    inertiaMatrix [
+                                      8.400000e-06 1.890000e-05 1.260000e-05
+                                      0.000000e+00 -2.900000e-06 0.000000e+00
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                            name "left_knee_link"
+                            boundingObject USE left_knee_link
+                            physics Physics {
+                              density -1
+                              mass 1.932000
+                              centerOfMass [ 0.005457 0.003964 -0.120740 ]
+                              inertiaMatrix [
+                                1.132900e-02 1.127700e-02 1.516800e-03
+                                4.820000e-05 -4.490000e-05 -7.146000e-04
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                      name "left_hip_yaw_link"
+                      boundingObject USE left_hip_yaw_link
+                      physics Physics {
+                        density -1
+                        mass 1.702000
+                        centerOfMass [ -0.057709 -0.010981 -0.150780 ]
+                        inertiaMatrix [
+                          5.777400e-03 7.612400e-03 3.149000e-03
+                          -5.411000e-04 -2.394800e-03 -7.072000e-04
+                        ]
+                      }
+                    }
+                  }
+                ]
+                name "left_hip_roll_link"
+                boundingObject USE left_hip_roll_link
+                physics Physics {
+                  density -1
+                  mass 1.520000
+                  centerOfMass [ 0.029812 -0.001045 -0.087934 ]
+                  inertiaMatrix [
+                    2.377300e-03 2.412300e-03 1.659500e-03
+                    -3.800000e-06 -3.908000e-04 1.840000e-05
+                  ]
+                }
+              }
+            }
+          ]
+          name "left_hip_pitch_link"
+          boundingObject USE left_hip_pitch_link
+          physics Physics {
+            density -1
+            mass 1.350000
+            centerOfMass [ 0.002741 0.047791 -0.026060 ]
+            inertiaMatrix [
+              1.811000e-03 1.419300e-03 1.281200e-03
+              3.680000e-05 -3.440000e-05 1.710000e-04
+            ]
+          }
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0.000000 1.000000 0.000000
+          anchor 0.000000 -0.064452 -0.102700
+        }
+        device [
+          RotationalMotor {
+            name "right_hip_pitch_joint"
+            maxVelocity 32.0
+            minPosition -2.5307
+            maxPosition 2.8798
+            maxTorque 88.0
+          }
+          PositionSensor {
+            name "right_hip_pitch_joint_sensor"
+          }
+        ]
+        endPoint Solid {
+          translation 0.000000 -0.064452 -0.102700
+          children [
+            Shape {
+              appearance USE dark
+              geometry DEF right_hip_pitch_link Mesh {
+                url "meshes/right_hip_pitch_link.STL"
+              }
+            }
+            HingeJoint {
+              jointParameters HingeJointParameters {
+                axis 0.984744 0.000000 0.174010
+                anchor 0.000000 -0.052000 -0.030465
+              }
+              device [
+                RotationalMotor {
+                  name "right_hip_roll_joint"
+                  maxVelocity 32.0
+                  minPosition -2.9671
+                  maxPosition 0.5236
+                  maxTorque 88.0
+                }
+                PositionSensor {
+                  name "right_hip_roll_joint_sensor"
+                }
+              ]
+              endPoint Solid {
+                translation 0.000000 -0.052000 -0.030465
+                rotation 0.000000 -1.000000 0.000000 0.174900
+                children [
+                  Shape {
+                    appearance USE white
+                    geometry DEF right_hip_roll_link Mesh {
+                      url "meshes/right_hip_roll_link.STL"
+                    }
+                  }
+                  HingeJoint {
+                    jointParameters HingeJointParameters {
+                      axis 0.000000 0.000000 1.000000
+                      anchor 0.025001 0.000000 -0.124120
+                    }
+                    device [
+                      RotationalMotor {
+                        name "right_hip_yaw_joint"
+                        maxVelocity 32.0
+                        minPosition -2.7576
+                        maxPosition 2.7576
+                        maxTorque 88.0
+                      }
+                      PositionSensor {
+                        name "right_hip_yaw_joint_sensor"
+                      }
+                    ]
+                    endPoint Solid {
+                      translation 0.025001 0.000000 -0.124120
+                      children [
+                        Shape {
+                          appearance USE white
+                          geometry DEF right_hip_yaw_link Mesh {
+                            url "meshes/right_hip_yaw_link.STL"
+                          }
+                        }
+                        HingeJoint {
+                          jointParameters HingeJointParameters {
+                            axis 0.000000 1.000000 0.000000
+                            anchor -0.078273 -0.002149 -0.177340
+                          }
+                          device [
+                            RotationalMotor {
+                              name "right_knee_joint"
+                              maxVelocity 20.0
+                              minPosition -0.087267
+                              maxPosition 2.8798
+                              maxTorque 139.0
+                            }
+                            PositionSensor {
+                              name "right_knee_joint_sensor"
+                            }
+                          ]
+                          endPoint Solid {
+                            translation -0.078273 -0.002149 -0.177340
+                            rotation 0.000000 1.000000 0.000000 0.174900
+                            children [
+                              Shape {
+                                appearance USE white
+                                geometry DEF right_knee_link Mesh {
+                                  url "meshes/right_knee_link.STL"
+                                }
+                              }
+                              HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  axis 0.000000 1.000000 0.000000
+                                  anchor 0.000000 0.000094 -0.300010
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "right_ankle_pitch_joint"
+                                    maxVelocity 30.0
+                                    minPosition -0.87267
+                                    maxPosition 0.5236
+                                    maxTorque 35.0
+                                  }
+                                  PositionSensor {
+                                    name "right_ankle_pitch_joint_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  translation 0.000000 0.000094 -0.300010
+                                  children [
+                                    Shape {
+                                      appearance USE white
+                                      geometry DEF right_ankle_pitch_link Mesh {
+                                        url "meshes/right_ankle_pitch_link.STL"
+                                      }
+                                    }
+                                    HingeJoint {
+                                      jointParameters HingeJointParameters {
+                                        anchor 0.000000 0.000000 -0.017558
+                                      }
+                                      device [
+                                        RotationalMotor {
+                                          name "right_ankle_roll_joint"
+                                          maxVelocity 30.0
+                                          minPosition -0.2618
+                                          maxPosition 0.2618
+                                          maxTorque 35.0
+                                        }
+                                        PositionSensor {
+                                          name "right_ankle_roll_joint_sensor"
+                                        }
+                                      ]
+                                      endPoint Solid {
+                                        translation 0.000000 0.000000 -0.017558
+                                        children [
+                                          Shape {
+                                            appearance USE dark
+                                            geometry DEF right_ankle_roll_link Mesh {
+                                              url "meshes/right_ankle_roll_link.STL"
+                                            }
+                                          }
+                                        ]
+                                        name "right_ankle_roll_link"
+                                        boundingObject Group {
+                                          children [
+                                            Pose {
+                                              translation -0.050000 0.025000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                            Pose {
+                                              translation -0.050000 -0.025000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                            Pose {
+                                              translation 0.120000 0.030000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                            Pose {
+                                              translation 0.120000 -0.030000 -0.030000
+                                              children [
+                                                Sphere {
+                                                  radius 0.005
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        physics Physics {
+                                          density -1
+                                          mass 0.608000
+                                          centerOfMass [ 0.026505 0.000000 -0.016425 ]
+                                          inertiaMatrix [
+                                            2.231000e-04 1.616100e-03 1.666700e-03
+                                            -2.000000e-07 8.910000e-05 1.000000e-07
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                  name "right_ankle_pitch_link"
+                                  boundingObject USE right_ankle_pitch_link
+                                  physics Physics {
+                                    density -1
+                                    mass 0.074000
+                                    centerOfMass [ -0.007269 0.000000 0.011137 ]
+                                    inertiaMatrix [
+                                      8.400000e-06 1.890000e-05 1.260000e-05
+                                      0.000000e+00 -2.900000e-06 0.000000e+00
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                            name "right_knee_link"
+                            boundingObject USE right_knee_link
+                            physics Physics {
+                              density -1
+                              mass 1.932000
+                              centerOfMass [ 0.005457 -0.003964 -0.120740 ]
+                              inertiaMatrix [
+                                1.132900e-02 1.127700e-02 1.516800e-03
+                                -4.820000e-05 4.490000e-05 7.146000e-04
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                      name "right_hip_yaw_link"
+                      boundingObject USE right_hip_yaw_link
+                      physics Physics {
+                        density -1
+                        mass 1.702000
+                        centerOfMass [ -0.057709 0.010981 -0.150780 ]
+                        inertiaMatrix [
+                          5.777400e-03 7.612400e-03 3.149000e-03
+                          5.411000e-04 -2.394800e-03 7.072000e-04
+                        ]
+                      }
+                    }
+                  }
+                ]
+                name "right_hip_roll_link"
+                boundingObject USE right_hip_roll_link
+                physics Physics {
+                  density -1
+                  mass 1.520000
+                  centerOfMass [ 0.029812 0.001045 -0.087934 ]
+                  inertiaMatrix [
+                    2.377300e-03 2.412300e-03 1.659500e-03
+                    3.800000e-06 -3.908000e-04 -1.840000e-05
+                  ]
+                }
+              }
+            }
+          ]
+          name "right_hip_pitch_link"
+          boundingObject USE right_hip_pitch_link
+          physics Physics {
+            density -1
+            mass 1.350000
+            centerOfMass [ 0.002741 -0.047791 -0.026060 ]
+            inertiaMatrix [
+              1.811000e-03 1.419300e-03 1.281200e-03
+              -3.680000e-05 -3.440000e-05 -1.710000e-04
+            ]
+          }
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 0.000000 0.000000 1.000000
+        }
+        device [
+          RotationalMotor {
+            name "waist_yaw_joint"
+            maxVelocity 32.0
+            minPosition -2.618
+            maxPosition 2.618
+            maxTorque 88.0
+          }
+          PositionSensor {
+            name "waist_yaw_joint_sensor"
+          }
+        ]
+        endPoint Solid {
+          children [
+            Shape {
+              appearance USE white
+              geometry DEF waist_yaw_link Mesh {
+                url "meshes/waist_yaw_link.STL"
+              }
+            }
+            HingeJoint {
+              jointParameters HingeJointParameters {
+                anchor -0.003964 0.000000 0.035000
+              }
+              device [
+                RotationalMotor {
+                  name "waist_roll_joint"
+                  maxVelocity 30.0
+                  minPosition -0.52
+                  maxPosition 0.52
+                  maxTorque 35.0
+                }
+                PositionSensor {
+                  name "waist_roll_joint_sensor"
+                }
+              ]
+              endPoint Solid {
+                translation -0.003964 0.000000 0.035000
+                children [
+                  Shape {
+                    appearance USE white
+                    geometry DEF waist_roll_link Mesh {
+                      url "meshes/waist_roll_link.STL"
+                    }
+                  }
+                  HingeJoint {
+                    jointParameters HingeJointParameters {
+                      axis 0.000000 1.000000 0.000000
+                      anchor 0.000000 0.000000 0.019000
+                    }
+                    device [
+                      RotationalMotor {
+                        name "waist_pitch_joint"
+                        maxVelocity 30.0
+                        minPosition -0.52
+                        maxPosition 0.52
+                        maxTorque 35.0
+                      }
+                      PositionSensor {
+                        name "waist_pitch_joint_sensor"
+                      }
+                    ]
+                    endPoint Solid {
+                      translation 0.000000 0.000000 0.019000
+                      children [
+                        Shape {
+                          appearance USE white
+                          geometry DEF torso_link Mesh {
+                            url "meshes/torso_link.STL"
+                          }
+                        }
+                        Solid {
+                          translation 0.003964 0.000000 -0.054000
+                          children [
+                            Shape {
+                              appearance USE dark
+                              geometry DEF logo_link Mesh {
+                                url "meshes/logo_link.STL"
+                              }
+                            }
+                          ]
+                          name "logo_link"
+                          boundingObject USE logo_link
+                          physics Physics {
+                            density -1
+                            mass 0.001000
+                            centerOfMass [ 0.000000 0.000000 0.000000 ]
+                            inertiaMatrix [
+                              1.000000e-07 1.000000e-07 1.000000e-07
+                              0.000000e+00 0.000000e+00 0.000000e+00
+                            ]
+                          }
+                        }
+                        Solid {
+                          translation 0.003964 0.000000 -0.054000
+                          children [
+                            Shape {
+                              appearance USE dark
+                              geometry DEF head_link Mesh {
+                                url "meshes/head_link.STL"
+                              }
+                            }
+                          ]
+                          name "head_link"
+                          boundingObject USE head_link
+                          physics Physics {
+                            density -1
+                            mass 1.036000
+                            centerOfMass [ 0.005267 0.000299 0.449869 ]
+                            inertiaMatrix [
+                              4.085051e-03 4.185212e-03 1.807911e-03
+                              -2.543000e-06 -6.945500e-05 -3.726000e-06
+                            ]
+                          }
+                        }
+                        Solid {
+                          translation 0.003964 0.000000 -0.054000
+                          children [
+                            Shape {
+                              appearance USE white
+                              geometry DEF waist_support_link Mesh {
+                                url "meshes/waist_support_link.STL"
+                              }
+                            }
+                          ]
+                          name "waist_support_link"
+                          boundingObject USE waist_support_link
+                          physics Physics {
+                            density -1
+                            mass 0.001000
+                            centerOfMass [ 0.000000 0.000000 0.000000 ]
+                            inertiaMatrix [
+                              1.000000e-07 1.000000e-07 1.000000e-07
+                              0.000000e+00 0.000000e+00 0.000000e+00
+                            ]
+                          }
+                        }
+                        HingeJoint {
+                          jointParameters HingeJointParameters {
+                            axis 0.000199 0.961246 0.275692
+                            anchor 0.003956 0.100220 0.237780
+                          }
+                          device [
+                            RotationalMotor {
+                              name "left_shoulder_pitch_joint"
+                              maxVelocity 37.0
+                              minPosition -3.0892
+                              maxPosition 2.6704
+                              maxTorque 25.0
+                            }
+                            PositionSensor {
+                              name "left_shoulder_pitch_joint_sensor"
+                            }
+                          ]
+                          endPoint Solid {
+                            translation 0.003956 0.100220 0.237780
+                            rotation 1.000000 0.000100 -0.000709 0.279310
+                            children [
+                              Shape {
+                                appearance USE white
+                                geometry DEF left_shoulder_pitch_link Mesh {
+                                  url "meshes/left_shoulder_pitch_link.STL"
+                                }
+                              }
+                              HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  anchor 0.000000 0.038000 -0.013831
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "left_shoulder_roll_joint"
+                                    maxVelocity 37.0
+                                    minPosition -1.5882
+                                    maxPosition 2.2515
+                                    maxTorque 25.0
+                                  }
+                                  PositionSensor {
+                                    name "left_shoulder_roll_joint_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  translation 0.000000 0.038000 -0.013831
+                                  rotation -1.000000 0.000000 0.000000 0.279250
+                                  children [
+                                    Shape {
+                                      appearance USE white
+                                      geometry DEF left_shoulder_roll_link Mesh {
+                                        url "meshes/left_shoulder_roll_link.STL"
+                                      }
+                                    }
+                                    HingeJoint {
+                                      jointParameters HingeJointParameters {
+                                        axis 0.000000 0.000000 1.000000
+                                        anchor 0.000000 0.006240 -0.103200
+                                      }
+                                      device [
+                                        RotationalMotor {
+                                          name "left_shoulder_yaw_joint"
+                                          maxVelocity 37.0
+                                          minPosition -2.618
+                                          maxPosition 2.618
+                                          maxTorque 25.0
+                                        }
+                                        PositionSensor {
+                                          name "left_shoulder_yaw_joint_sensor"
+                                        }
+                                      ]
+                                      endPoint Solid {
+                                        translation 0.000000 0.006240 -0.103200
+                                        children [
+                                          Shape {
+                                            appearance USE white
+                                            geometry DEF left_shoulder_yaw_link Mesh {
+                                              url "meshes/left_shoulder_yaw_link.STL"
+                                            }
+                                          }
+                                          HingeJoint {
+                                            jointParameters HingeJointParameters {
+                                              axis 0.000000 1.000000 0.000000
+                                              anchor 0.015783 0.000000 -0.080518
+                                            }
+                                            device [
+                                              RotationalMotor {
+                                                name "left_elbow_joint"
+                                                maxVelocity 37.0
+                                                minPosition -1.0472
+                                                maxPosition 2.0944
+                                                maxTorque 25.0
+                                              }
+                                              PositionSensor {
+                                                name "left_elbow_joint_sensor"
+                                              }
+                                            ]
+                                            endPoint Solid {
+                                              translation 0.015783 0.000000 -0.080518
+                                              children [
+                                                Shape {
+                                                  appearance USE white
+                                                  geometry DEF left_elbow_link Mesh {
+                                                    url "meshes/left_elbow_link.STL"
+                                                  }
+                                                }
+                                                HingeJoint {
+                                                  jointParameters HingeJointParameters {
+                                                    anchor 0.100000 0.001888 -0.010000
+                                                  }
+                                                  device [
+                                                    RotationalMotor {
+                                                      name "left_wrist_roll_joint"
+                                                      maxVelocity 37.0
+                                                      minPosition -1.972222054
+                                                      maxPosition 1.972222054
+                                                      maxTorque 25.0
+                                                    }
+                                                    PositionSensor {
+                                                      name "left_wrist_roll_joint_sensor"
+                                                    }
+                                                  ]
+                                                  endPoint Solid {
+                                                    translation 0.100000 0.001888 -0.010000
+                                                    children [
+                                                      Shape {
+                                                        appearance USE white
+                                                        geometry DEF left_wrist_roll_link Mesh {
+                                                          url "meshes/left_wrist_roll_link.STL"
+                                                        }
+                                                      }
+                                                      HingeJoint {
+                                                        jointParameters HingeJointParameters {
+                                                          axis 0.000000 1.000000 0.000000
+                                                          anchor 0.038000 0.000000 0.000000
+                                                        }
+                                                        device [
+                                                          RotationalMotor {
+                                                            name "left_wrist_pitch_joint"
+                                                            maxVelocity 22.0
+                                                            minPosition -1.614429558
+                                                            maxPosition 1.614429558
+                                                            maxTorque 5.0
+                                                          }
+                                                          PositionSensor {
+                                                            name "left_wrist_pitch_joint_sensor"
+                                                          }
+                                                        ]
+                                                        endPoint Solid {
+                                                          translation 0.038000 0.000000 0.000000
+                                                          children [
+                                                            Shape {
+                                                              appearance USE white
+                                                              geometry DEF left_wrist_pitch_link Mesh {
+                                                                url "meshes/left_wrist_pitch_link.STL"
+                                                              }
+                                                            }
+                                                            HingeJoint {
+                                                              jointParameters HingeJointParameters {
+                                                                axis 0.000000 0.000000 1.000000
+                                                                anchor 0.046000 0.000000 0.000000
+                                                              }
+                                                              device [
+                                                                RotationalMotor {
+                                                                  name "left_wrist_yaw_joint"
+                                                                  maxVelocity 22.0
+                                                                  minPosition -1.614429558
+                                                                  maxPosition 1.614429558
+                                                                  maxTorque 5.0
+                                                                }
+                                                                PositionSensor {
+                                                                  name "left_wrist_yaw_joint_sensor"
+                                                                }
+                                                              ]
+                                                              endPoint Solid {
+                                                                translation 0.046000 0.000000 0.000000
+                                                                children [
+                                                                  Shape {
+                                                                    appearance USE white
+                                                                    geometry DEF left_wrist_yaw_link Mesh {
+                                                                      url "meshes/left_wrist_yaw_link.STL"
+                                                                    }
+                                                                  }
+                                                                  Solid {
+                                                                    translation 0.041500 0.003000 0.000000
+                                                                    children [
+                                                                      Shape {
+                                                                        appearance USE white
+                                                                        geometry DEF left_rubber_hand Mesh {
+                                                                          url "meshes/left_rubber_hand.STL"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                    name "left_rubber_hand"
+                                                                    physics Physics {
+                                                                      density -1
+                                                                      mass 0.170000
+                                                                      centerOfMass [ 0.053613 -0.002959 0.002154 ]
+                                                                      inertiaMatrix [
+                                                                        1.009949e-04 2.813587e-04 2.189477e-04
+                                                                        3.618591e-05 -7.430152e-07 3.301897e-06
+                                                                      ]
+                                                                    }
+                                                                  }
+                                                                ]
+                                                                name "left_wrist_yaw_link"
+                                                                boundingObject USE left_wrist_yaw_link
+                                                                physics Physics {
+                                                                  density -1
+                                                                  mass 0.084576
+                                                                  centerOfMass [ 0.022004 0.000495 0.000539 ]
+                                                                  inertiaMatrix [
+                                                                    4.929129e-05 5.973338e-05 3.928084e-05
+                                                                    -4.573549e-07 4.458676e-06 4.321720e-07
+                                                                  ]
+                                                                }
+                                                              }
+                                                            }
+                                                          ]
+                                                          name "left_wrist_pitch_link"
+                                                          boundingObject USE left_wrist_pitch_link
+                                                          physics Physics {
+                                                            density -1
+                                                            mass 0.484050
+                                                            centerOfMass [ 0.023000 -0.001117 -0.001117 ]
+                                                            inertiaMatrix [
+                                                              1.657965e-04 4.295406e-04 4.295370e-04
+                                                              -1.231207e-05 1.231699e-05 8.141771e-07
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    ]
+                                                    name "left_wrist_roll_link"
+                                                    boundingObject USE left_wrist_roll_link
+                                                    physics Physics {
+                                                      density -1
+                                                      mass 0.085445
+                                                      centerOfMass [ 0.017139 0.000538 0.000000 ]
+                                                      inertiaMatrix [
+                                                        4.821544e-05 3.722899e-05 5.482107e-05
+                                                        -4.245110e-06 5.105990e-09 -1.235250e-09
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              ]
+                                              name "left_elbow_link"
+                                              boundingObject USE left_elbow_link
+                                              physics Physics {
+                                                density -1
+                                                mass 0.600000
+                                                centerOfMass [ 0.064956 0.004454 -0.010062 ]
+                                                inertiaMatrix [
+                                                  2.891000e-04 4.152000e-04 4.197000e-04
+                                                  6.530000e-05 1.720000e-05 -5.600000e-06
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                        name "left_shoulder_yaw_link"
+                                        boundingObject USE left_shoulder_yaw_link
+                                        physics Physics {
+                                          density -1
+                                          mass 0.734000
+                                          centerOfMass [ 0.010773 -0.002949 -0.072009 ]
+                                          inertiaMatrix [
+                                            9.988000e-04 1.060500e-03 4.354000e-04
+                                            7.900000e-06 1.412000e-04 -2.860000e-05
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                  name "left_shoulder_roll_link"
+                                  boundingObject Pose {
+                                    translation -0.004000 0.006000 -0.053000
+                                    children [
+                                      Cylinder {
+                                        radius 0.03
+                                        height 0.03
+                                      }
+                                    ]
+                                  }
+                                  physics Physics {
+                                    density -1
+                                    mass 0.643000
+                                    centerOfMass [ -0.000227 0.007270 -0.063243 ]
+                                    inertiaMatrix [
+                                      6.177000e-04 6.912000e-04 3.894000e-04
+                                      -1.000000e-06 8.700000e-06 -5.300000e-06
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                            name "left_shoulder_pitch_link"
+                            boundingObject Pose {
+                              translation 0.000000 0.040000 -0.010000
+                              rotation 0.000000 1.000000 0.000000 1.570796
+                              children [
+                                Cylinder {
+                                  radius 0.03
+                                  height 0.05
+                                }
+                              ]
+                            }
+                            physics Physics {
+                              density -1
+                              mass 0.718000
+                              centerOfMass [ 0.000000 0.035892 -0.011628 ]
+                              inertiaMatrix [
+                                4.291000e-04 4.530000e-04 4.230000e-04
+                                -9.200000e-06 6.400000e-06 2.260000e-05
+                              ]
+                            }
+                          }
+                        }
+                        HingeJoint {
+                          jointParameters HingeJointParameters {
+                            axis -0.000199 0.961246 -0.275692
+                            anchor 0.003956 -0.100210 0.237780
+                          }
+                          device [
+                            RotationalMotor {
+                              name "right_shoulder_pitch_joint"
+                              maxVelocity 37.0
+                              minPosition -3.0892
+                              maxPosition 2.6704
+                              maxTorque 25.0
+                            }
+                            PositionSensor {
+                              name "right_shoulder_pitch_joint_sensor"
+                            }
+                          ]
+                          endPoint Solid {
+                            translation 0.003956 -0.100210 0.237780
+                            rotation -1.000000 0.000100 0.000709 0.279310
+                            children [
+                              Shape {
+                                appearance USE white
+                                geometry DEF right_shoulder_pitch_link Mesh {
+                                  url "meshes/right_shoulder_pitch_link.STL"
+                                }
+                              }
+                              HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  anchor 0.000000 -0.038000 -0.013831
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "right_shoulder_roll_joint"
+                                    maxVelocity 37.0
+                                    minPosition -2.2515
+                                    maxPosition 1.5882
+                                    maxTorque 25.0
+                                  }
+                                  PositionSensor {
+                                    name "right_shoulder_roll_joint_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  translation 0.000000 -0.038000 -0.013831
+                                  rotation 1.000000 0.000000 0.000000 0.279250
+                                  children [
+                                    Shape {
+                                      appearance USE white
+                                      geometry DEF right_shoulder_roll_link Mesh {
+                                        url "meshes/right_shoulder_roll_link.STL"
+                                      }
+                                    }
+                                    HingeJoint {
+                                      jointParameters HingeJointParameters {
+                                        axis 0.000000 0.000000 1.000000
+                                        anchor 0.000000 -0.006240 -0.103200
+                                      }
+                                      device [
+                                        RotationalMotor {
+                                          name "right_shoulder_yaw_joint"
+                                          maxVelocity 37.0
+                                          minPosition -2.618
+                                          maxPosition 2.618
+                                          maxTorque 25.0
+                                        }
+                                        PositionSensor {
+                                          name "right_shoulder_yaw_joint_sensor"
+                                        }
+                                      ]
+                                      endPoint Solid {
+                                        translation 0.000000 -0.006240 -0.103200
+                                        children [
+                                          Shape {
+                                            appearance USE white
+                                            geometry DEF right_shoulder_yaw_link Mesh {
+                                              url "meshes/right_shoulder_yaw_link.STL"
+                                            }
+                                          }
+                                          HingeJoint {
+                                            jointParameters HingeJointParameters {
+                                              axis 0.000000 1.000000 0.000000
+                                              anchor 0.015783 0.000000 -0.080518
+                                            }
+                                            device [
+                                              RotationalMotor {
+                                                name "right_elbow_joint"
+                                                maxVelocity 37.0
+                                                minPosition -1.0472
+                                                maxPosition 2.0944
+                                                maxTorque 25.0
+                                              }
+                                              PositionSensor {
+                                                name "right_elbow_joint_sensor"
+                                              }
+                                            ]
+                                            endPoint Solid {
+                                              translation 0.015783 0.000000 -0.080518
+                                              children [
+                                                Shape {
+                                                  appearance USE white
+                                                  geometry DEF right_elbow_link Mesh {
+                                                    url "meshes/right_elbow_link.STL"
+                                                  }
+                                                }
+                                                HingeJoint {
+                                                  jointParameters HingeJointParameters {
+                                                    anchor 0.100000 -0.001888 -0.010000
+                                                  }
+                                                  device [
+                                                    RotationalMotor {
+                                                      name "right_wrist_roll_joint"
+                                                      maxVelocity 37.0
+                                                      minPosition -1.972222054
+                                                      maxPosition 1.972222054
+                                                      maxTorque 25.0
+                                                    }
+                                                    PositionSensor {
+                                                      name "right_wrist_roll_joint_sensor"
+                                                    }
+                                                  ]
+                                                  endPoint Solid {
+                                                    translation 0.100000 -0.001888 -0.010000
+                                                    children [
+                                                      Shape {
+                                                        appearance USE white
+                                                        geometry DEF right_wrist_roll_link Mesh {
+                                                          url "meshes/right_wrist_roll_link.STL"
+                                                        }
+                                                      }
+                                                      HingeJoint {
+                                                        jointParameters HingeJointParameters {
+                                                          axis 0.000000 1.000000 0.000000
+                                                          anchor 0.038000 0.000000 0.000000
+                                                        }
+                                                        device [
+                                                          RotationalMotor {
+                                                            name "right_wrist_pitch_joint"
+                                                            maxVelocity 22.0
+                                                            minPosition -1.614429558
+                                                            maxPosition 1.614429558
+                                                            maxTorque 5.0
+                                                          }
+                                                          PositionSensor {
+                                                            name "right_wrist_pitch_joint_sensor"
+                                                          }
+                                                        ]
+                                                        endPoint Solid {
+                                                          translation 0.038000 0.000000 0.000000
+                                                          children [
+                                                            Shape {
+                                                              appearance USE white
+                                                              geometry DEF right_wrist_pitch_link Mesh {
+                                                                url "meshes/right_wrist_pitch_link.STL"
+                                                              }
+                                                            }
+                                                            HingeJoint {
+                                                              jointParameters HingeJointParameters {
+                                                                axis 0.000000 0.000000 1.000000
+                                                                anchor 0.046000 0.000000 0.000000
+                                                              }
+                                                              device [
+                                                                RotationalMotor {
+                                                                  name "right_wrist_yaw_joint"
+                                                                  maxVelocity 22.0
+                                                                  minPosition -1.614429558
+                                                                  maxPosition 1.614429558
+                                                                  maxTorque 5.0
+                                                                }
+                                                                PositionSensor {
+                                                                  name "right_wrist_yaw_joint_sensor"
+                                                                }
+                                                              ]
+                                                              endPoint Solid {
+                                                                translation 0.046000 0.000000 0.000000
+                                                                children [
+                                                                  Shape {
+                                                                    appearance USE white
+                                                                    geometry DEF right_wrist_yaw_link Mesh {
+                                                                      url "meshes/right_wrist_yaw_link.STL"
+                                                                    }
+                                                                  }
+                                                                  Solid {
+                                                                    translation 0.041500 -0.003000 0.000000
+                                                                    children [
+                                                                      Shape {
+                                                                        appearance USE white
+                                                                        geometry DEF right_rubber_hand Mesh {
+                                                                          url "meshes/right_rubber_hand.STL"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                    name "right_rubber_hand"
+                                                                    physics Physics {
+                                                                      density -1
+                                                                      mass 0.170000
+                                                                      centerOfMass [ 0.053613 0.002959 0.002154 ]
+                                                                      inertiaMatrix [
+                                                                        1.009949e-04 2.813587e-04 2.189477e-04
+                                                                        -3.618591e-05 -7.430152e-07 -3.301897e-06
+                                                                      ]
+                                                                    }
+                                                                  }
+                                                                ]
+                                                                name "right_wrist_yaw_link"
+                                                                boundingObject USE right_wrist_yaw_link
+                                                                physics Physics {
+                                                                  density -1
+                                                                  mass 0.084576
+                                                                  centerOfMass [ 0.022004 -0.000495 0.000539 ]
+                                                                  inertiaMatrix [
+                                                                    4.929129e-05 5.973338e-05 3.928084e-05
+                                                                    4.573549e-07 4.458676e-06 -4.321720e-07
+                                                                  ]
+                                                                }
+                                                              }
+                                                            }
+                                                          ]
+                                                          name "right_wrist_pitch_link"
+                                                          boundingObject USE right_wrist_pitch_link
+                                                          physics Physics {
+                                                            density -1
+                                                            mass 0.484050
+                                                            centerOfMass [ 0.023000 0.001117 -0.001117 ]
+                                                            inertiaMatrix [
+                                                              1.657965e-04 4.295406e-04 4.295370e-04
+                                                              1.231207e-05 1.231699e-05 -8.141771e-07
+                                                            ]
+                                                          }
+                                                        }
+                                                      }
+                                                    ]
+                                                    name "right_wrist_roll_link"
+                                                    boundingObject USE right_wrist_roll_link
+                                                    physics Physics {
+                                                      density -1
+                                                      mass 0.085445
+                                                      centerOfMass [ 0.017139 -0.000538 0.000000 ]
+                                                      inertiaMatrix [
+                                                        4.821544e-05 3.722899e-05 5.482107e-05
+                                                        4.245110e-06 5.105990e-09 1.235250e-09
+                                                      ]
+                                                    }
+                                                  }
+                                                }
+                                              ]
+                                              name "right_elbow_link"
+                                              boundingObject USE right_elbow_link
+                                              physics Physics {
+                                                density -1
+                                                mass 0.600000
+                                                centerOfMass [ 0.064956 -0.004454 -0.010062 ]
+                                                inertiaMatrix [
+                                                  2.891000e-04 4.152000e-04 4.197000e-04
+                                                  -6.530000e-05 1.720000e-05 5.600000e-06
+                                                ]
+                                              }
+                                            }
+                                          }
+                                        ]
+                                        name "right_shoulder_yaw_link"
+                                        boundingObject USE right_shoulder_yaw_link
+                                        physics Physics {
+                                          density -1
+                                          mass 0.734000
+                                          centerOfMass [ 0.010773 0.002949 -0.072009 ]
+                                          inertiaMatrix [
+                                            9.988000e-04 1.060500e-03 4.354000e-04
+                                            -7.900000e-06 1.412000e-04 2.860000e-05
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  ]
+                                  name "right_shoulder_roll_link"
+                                  boundingObject Pose {
+                                    translation -0.004000 -0.006000 -0.053000
+                                    children [
+                                      Cylinder {
+                                        radius 0.03
+                                        height 0.03
+                                      }
+                                    ]
+                                  }
+                                  physics Physics {
+                                    density -1
+                                    mass 0.643000
+                                    centerOfMass [ -0.000227 -0.007270 -0.063243 ]
+                                    inertiaMatrix [
+                                      6.177000e-04 6.912000e-04 3.894000e-04
+                                      1.000000e-06 8.700000e-06 5.300000e-06
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                            name "right_shoulder_pitch_link"
+                            boundingObject Pose {
+                              translation 0.000000 -0.040000 -0.010000
+                              rotation 0.000000 1.000000 0.000000 1.570796
+                              children [
+                                Cylinder {
+                                  radius 0.03
+                                  height 0.05
+                                }
+                              ]
+                            }
+                            physics Physics {
+                              density -1
+                              mass 0.718000
+                              centerOfMass [ 0.000000 -0.035892 -0.011628 ]
+                              inertiaMatrix [
+                                4.291000e-04 4.530000e-04 4.230000e-04
+                                9.200000e-06 6.400000e-06 -2.260000e-05
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                      name "torso_link"
+                      boundingObject USE torso_link
+                      physics Physics {
+                        density -1
+                        mass 8.562000
+                        centerOfMass [ 0.002601 0.000257 0.153719 ]
+                        inertiaMatrix [
+                          6.567497e-02 5.353519e-02 3.080812e-02
+                          -8.597000e-05 -1.737252e-03 8.689900e-05
+                        ]
+                      }
+                    }
+                  }
+                ]
+                name "waist_roll_link"
+                physics Physics {
+                  density -1
+                  mass 0.047000
+                  centerOfMass [ 0.000000 -0.000236 0.010111 ]
+                  inertiaMatrix [
+                    7.515000e-06 6.398000e-06 3.988000e-06
+                    0.000000e+00 0.000000e+00 9.900000e-08
+                  ]
+                }
+              }
+            }
+          ]
+          name "waist_yaw_link"
+          physics Physics {
+            density -1
+            mass 0.244000
+            centerOfMass [ 0.003964 0.000000 0.018769 ]
+            inertiaMatrix [
+              9.958700e-05 1.241100e-04 1.558600e-04
+              -1.833000e-06 -1.261700e-05 -1.180000e-07
+            ]
+          }
+        }
+      }
+    ]
+    name IS name
+    physics Physics {
+      density -1
+      mass 3.813000
+      centerOfMass [ 0.000000 0.000000 -0.076050 ]
+      inertiaMatrix [
+        1.054900e-02 9.308900e-03 7.918400e-03
+        0.000000e+00 2.100000e-06 0.000000e+00
+      ]
+    }
+  }
+}

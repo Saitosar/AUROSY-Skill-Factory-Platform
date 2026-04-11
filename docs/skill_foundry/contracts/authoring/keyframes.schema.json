@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-foundry/authoring/keyframes-v1",
+  "title": "Keyframes v1",
+  "type": "object",
+  "required": ["schema_version", "units", "robot_model", "keyframes"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "robot_model": { "type": "string", "minLength": 1 },
+    "units": {
+      "type": "object",
+      "required": ["angle", "time"],
+      "properties": {
+        "angle": { "const": "degrees" },
+        "time": { "const": "seconds" }
+      },
+      "additionalProperties": false
+    },
+    "keyframes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["timestamp_s", "joints_deg"],
+        "properties": {
+          "timestamp_s": { "type": "number", "minimum": 0 },
+          "joints_deg": {
+            "type": "object",
+            "minProperties": 1,
+            "patternProperties": {
+              "^[0-9]+$": { "type": "number" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

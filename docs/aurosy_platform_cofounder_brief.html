@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AUROSY Creators Factory Platform — бриф для сооснователей</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222d;
+      --border: #2d3a4a;
+      --text: #e8edf4;
+      --muted: #9aa8b8;
+      --accent: #5b9fd4;
+      --accent-soft: rgba(91, 159, 212, 0.15);
+      --ok: #6bcf7f;
+      --warn: #e6b35a;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      --nav-width: 15.5rem;
+      --radius: 10px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: var(--nav-width) 1fr;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        max-height: 50vh;
+        overflow: auto;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    .sidebar {
+      padding: 1.25rem 1rem 2rem;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-list a {
+      display: block;
+      padding: 0.35rem 0.5rem;
+      margin: 0.1rem 0;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.9rem;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-list a:hover {
+      background: var(--accent-soft);
+      text-decoration: none;
+    }
+
+    .nav-list a.active {
+      background: var(--accent-soft);
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .nav-list .sub a {
+      padding-left: 1rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .nav-list .sub a.active {
+      color: var(--accent);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toolbar input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
+    main {
+      padding: 2rem 2.5rem 4rem;
+      max-width: 52rem;
+    }
+
+    @media (max-width: 600px) {
+      main { padding: 1.25rem 1rem 3rem; }
+    }
+
+    .hero {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero .kicker {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin: 0 0 0.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      line-height: 1.25;
+      margin: 0 0 0.75rem;
+      font-weight: 650;
+    }
+
+    .hero .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    section {
+      margin-bottom: 2.75rem;
+    }
+
+    section > h2 {
+      font-size: 1.35rem;
+      margin: 0 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section h3 {
+      font-size: 1.1rem;
+      margin: 1.5rem 0 0.6rem;
+      color: var(--text);
+    }
+
+    p { margin: 0 0 1rem; }
+
+    ul, ol { margin: 0 0 1rem; padding-left: 1.35rem; }
+    li { margin-bottom: 0.35rem; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      vertical-align: middle;
+      margin-left: 0.35rem;
+    }
+
+    .badge.phase2 { background: rgba(230, 179, 90, 0.2); color: var(--warn); }
+    .badge.phase3 { background: rgba(107, 207, 127, 0.18); color: var(--ok); }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      margin: 1rem 0;
+    }
+
+    .callout strong { color: var(--text); }
+
+    details {
+      margin: 0.75rem 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(26, 34, 45, 0.6);
+    }
+
+    details summary {
+      cursor: pointer;
+      padding: 0.65rem 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      list-style: none;
+    }
+
+    details summary::-webkit-details-marker { display: none; }
+
+    details[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+
+    details .detail-body {
+      padding: 0.85rem 1rem 1rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    details .detail-body p:last-child { margin-bottom: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+    }
+
+    .diagram {
+      margin: 1.25rem 0;
+      overflow-x: auto;
+    }
+
+    .diagram svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .module-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem;
+      margin: 1.25rem 0;
+      background: var(--surface);
+    }
+
+    .module-card h3 {
+      margin-top: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .module-card .num {
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    body.compact .tech-layer {
+      display: none !important;
+    }
+
+    .sources-list {
+      font-size: 0.95rem;
+    }
+
+    .sources-list li { margin-bottom: 0.5rem; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Оглавление">
+      <div class="toolbar">
+        <label title="Скрыть технические блоки и таблицу контрактов">
+          <input type="checkbox" id="compact-toggle" aria-describedby="compact-help">
+          Компактный вид (только смысл)
+        </label>
+      </div>
+      <p id="compact-help" class="tech-layer" style="font-size:0.8rem;color:var(--muted);margin:0 0 1rem;">
+        Для CEO: включите переключатель, чтобы скрыть детали входов/выходов и технические аккордеоны.
+      </p>
+      <h2>Разделы</h2>
+      <ul class="nav-list" id="toc">
+        <li><a href="#intro">Введение</a></li>
+        <li><a href="#vision">Видение</a></li>
+        <li><a href="#philosophy">Философия платформы</a></li>
+        <li><a href="#business-value">Бизнес-ценность</a></li>
+        <li><a href="#user-value">Ценность для пользователей</a></li>
+        <li><a href="#problem">Проблема и зачем платформа</a></li>
+        <li><a href="#user-journey">Путь пользователя</a></li>
+        <li><a href="#architecture">Архитектура</a></li>
+        <li class="sub tech-layer"><a href="#optional-branch">Опциональная ветка данных</a></li>
+        <li class="sub tech-layer"><a href="#contracts">Контракты между модулями</a></li>
+        <li><a href="#modules">Модули</a></li>
+        <li class="sub"><a href="#mod-authoring">Authoring UI / SDK</a></li>
+        <li class="sub"><a href="#mod-store">Artifact store</a></li>
+        <li class="sub"><a href="#mod-preprocessor">Preprocessor</a></li>
+        <li class="sub"><a href="#mod-sim-playback">SimPlayback</a></li>
+        <li class="sub"><a href="#mod-trajectory">Trajectory recorder</a></li>
+        <li class="sub"><a href="#mod-orchestrator">Training orchestrator</a></li>
+        <li class="sub"><a href="#mod-rl">RL worker</a></li>
+        <li class="sub"><a href="#mod-validation">Validation</a></li>
+        <li class="sub"><a href="#mod-export">Export / packaging</a></li>
+        <li class="sub"><a href="#mod-distribution">Distribution</a></li>
+        <li class="sub"><a href="#mod-runtime">Robot runtime</a></li>
+        <li><a href="#platform-web">Веб-платформа (MVP)</a></li>
+        <li><a href="#limitations">Честные ограничения</a></li>
+        <li><a href="#sources">Источники в репозитории</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <header class="hero" id="intro" data-section>
+        <p class="kicker">Документ для сооснователей</p>
+        <h1>AUROSY Creators Factory Platform</h1>
+        <p class="lead">
+          Единая точка правды о продукте: зачем существует платформа, какую ценность она создаёт для бизнеса и пользователей,
+          как проходит путь от идеи движения до навыка на роботе, и из каких модулей состоит система.
+          Аудитория: CEO (продукт, продажи) и технический Product Owner.
+        </p>
+      </header>
+
+      <section id="vision" data-section>
+        <h2>Видение</h2>
+        <p>
+          <strong>Skill Foundry (Robotic Skill Foundry)</strong> — это слой платформы, в котором разрежённые намерения пользователя
+          (позы, ключевые кадры, сценарии из последовательности действий) превращаются в <strong>обучаемый сигнал</strong>,
+          проходят <strong>симуляционное обучение с подкреплением</strong> и на выходе дают <strong>политику</strong>
+          — нейросетевой контроллер или эквивалентный артефакт, пригодный для выполнения на реальном роботе,
+          подключённом к платформе.
+        </p>
+        <p>
+          Платформа не заменяет редактор поз и motion: она добавляет <strong>следующий уровень</strong> —
+          из разрежённых данных получаются плотные референсы и при необходимости демонстрации с физикой,
+          затем метрики качества и контроллер, согласованный с массами, инерцией, контактами и ограничениями приводов.
+        </p>
+      </section>
+
+      <section id="philosophy" data-section>
+        <h2>Философия продукта</h2>
+        <ul>
+          <li><strong>Единый продуктовый конвейер</strong> для краудсорсинговых motion и сценариев: общие контракты данных,
+            очередь обучения, каталог политик и выдача на робота — в отличие от разрозненных эталонных пайплайнов производителя робота под свою инфраструктуру.</li>
+          <li><strong>Оркестрация и контракты</strong> вокруг симуляции, обучения и рантайма: не «ещё один скрипт», а согласованная цепочка артефактов и версий.</li>
+          <li><strong>Хранение смысла, а не только файлов:</strong> помимо <code>pose.json</code> и сценариев — плотные траектории,
+            наборы демонстраций, метрики, экспортируемая политика и манифест (что на входе сети, единицы, частота дискретизации).</li>
+        </ul>
+      </section>
+
+      <section id="business-value" data-section>
+        <h2>Бизнес-ценность платформы</h2>
+        <ul>
+          <li><strong>Масштаб UGC:</strong> тысячи авторов могут создавать контент без постоянной команды телеоператоров на каждый навык.</li>
+          <li><strong>Снижение стоимости производства навыков:</strong> редкие экспертные записи дополняются автоматическим обогащением и обучением в симуляции.</li>
+          <li><strong>Каталог и дистрибуция:</strong> проверенные пакеты навыков с правами доступа и публикацией — основа для маркетплейса, лицензий и монетизации.</li>
+          <li><strong>Подключение к экосистеме:</strong> клиент с роботом получает навыки через платформу, что привязывает ценность к подписке и сервису, а не только к «файлу с углами».</li>
+        </ul>
+      </section>
+
+      <section id="user-value" data-section>
+        <h2>Ценность для пользователей</h2>
+        <ul>
+          <li><strong>Авторы motion и сценариев:</strong> возможность довести задуманное движение до устойчивого поведения на роботе без ручной многократной доводки на железе.</li>
+          <li><strong>Владельцы и операторы роботов:</strong> загрузка навыков с понятным статусом качества, манифестом совместимости и контуром безопасности на рантайме.</li>
+          <li><strong>Прозрачность качества:</strong> метрики (трекинг, падения, энергия) и валидация перед публикацией снижают риск «сломанного» UGC.</li>
+        </ul>
+      </section>
+
+      <section id="problem" data-section>
+        <h2>Какую проблему решает платформа и зачем она нужна</h2>
+        <p>
+          Сегодня движение задаётся преимущественно <strong>кинематически</strong>: углы суставов, ключевые кадры, сценарии из действий.
+          Такие данные не учитывают полностью <strong>динамику</strong> (массы, инерцию, контакты, задержки приводов),
+          не гарантируют <strong>баланс и устойчивость</strong> в физическом смысле и плохо масштабируются на стабильное воспроизведение
+          на <strong>реальном роботе</strong> без многократной ручной доводки.
+        </p>
+        <p>
+          Нанимать команду для телеоперации и записи каждого навыка дорого; хранить только скрипты с PD-командами недостаточно для платформы,
+          где много пользователей создают контент. <strong>Skill Foundry</strong> закрывает разрыв между «намерением автора» и «навыком,
+          который можно безопасно и предсказуемо запускать на роботе».
+        </p>
+      </section>
+
+      <section id="user-journey" data-section>
+        <h2>Путь пользователя</h2>
+        <ol>
+          <li><strong>Авторинг</strong> — создание поз, keyframes, motion и сценариев в UI или через SDK; предпросмотр в симуляторе (например MuJoCo).</li>
+          <li><strong>Сохранение</strong> — версионированные артефакты попадают в хранилище и привязываются к проекту и пользователю.</li>
+          <li><strong>Препроцессинг</strong> — разрежённые кадры превращаются в референсную траекторию фиксированной частоты.</li>
+          <li><strong>Опционально:</strong> проигрывание в симуляции и запись демонстраций для обучения с «истиной» физики.</li>
+          <li><strong>Постановка в очередь обучения</strong> — задача уходит оркестратору; изолированный воркер запускает RL.</li>
+          <li><strong>Обучение (RL)</strong> — политика оптимизируется под награды (трекинг референса, выживание, энергия и др.).</li>
+          <li><strong>Валидация</strong> — сравнение метрик с порогами; решение принять, отклонить или предупредить.</li>
+          <li><strong>Экспорт</strong> — пакет навыка: веса, манифест, при необходимости ONNX.</li>
+          <li><strong>Каталог</strong> — публикация, права доступа, скачивание для клиента робота.</li>
+          <li><strong>Рантайм на роботе</strong> — загрузка пакета, проверка совместимости, инференс и безопасные команды приводам.</li>
+        </ol>
+      </section>
+
+      <section id="architecture" data-section>
+        <h2>Архитектура: общая схема</h2>
+        <p>
+          Ниже — основной поток данных от автора до робота. Прямоугольники упорядочены слева направо, как в продуктовом конвейере.
+        </p>
+        <div class="diagram" role="img" aria-label="Схема: от Authoring UI до Robot runtime">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 130" width="1000" height="130">
+            <defs>
+              <style>
+                .d-box { fill: #1a222d; stroke: #2d3a4a; stroke-width: 1.5; }
+                .d-txt { fill: #e8edf4; font-family: system-ui, sans-serif; font-size: 10px; }
+                .d-arr { stroke: #5b9fd4; stroke-width: 1.5; fill: none; marker-end: url(#dm); }
+              </style>
+              <marker id="dm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <polygon points="0 0, 6 3, 0 6" fill="#5b9fd4" />
+              </marker>
+            </defs>
+            <g transform="translate(0,8)">
+              <rect class="d-box" x="0" y="24" width="76" height="40" rx="6" />
+              <text class="d-txt" x="38" y="42" text-anchor="middle">Authoring UI</text>
+              <text class="d-txt" x="38" y="54" text-anchor="middle" font-size="8" fill="#9aa8b8">/ SDK</text>
+              <path class="d-arr" d="M 78 44 L 88 44" />
+              <rect class="d-box" x="90" y="24" width="82" height="40" rx="6" />
+              <text class="d-txt" x="131" y="46" text-anchor="middle">Artifact store</text>
+              <path class="d-arr" d="M 174 44 L 184 44" />
+              <rect class="d-box" x="186" y="24" width="88" height="40" rx="6" />
+              <text class="d-txt" x="230" y="46" text-anchor="middle">Preprocessor</text>
+              <path class="d-arr" d="M 276 44 L 286 44" />
+              <rect class="d-box" x="288" y="18" width="96" height="52" rx="6" />
+              <text class="d-txt" x="336" y="38" text-anchor="middle">Reference</text>
+              <text class="d-txt" x="336" y="52" text-anchor="middle">Trajectory</text>
+              <path class="d-arr" d="M 386 44 L 396 44" />
+              <rect class="d-box" x="398" y="24" width="104" height="40" rx="6" />
+              <text class="d-txt" x="450" y="40" text-anchor="middle">Training</text>
+              <text class="d-txt" x="450" y="52" text-anchor="middle">orchestrator</text>
+              <path class="d-arr" d="M 504 44 L 514 44" />
+              <rect class="d-box" x="516" y="24" width="72" height="40" rx="6" />
+              <text class="d-txt" x="552" y="46" text-anchor="middle">RL worker</text>
+              <path class="d-arr" d="M 590 44 L 600 44" />
+              <rect class="d-box" x="602" y="24" width="72" height="40" rx="6" />
+              <text class="d-txt" x="638" y="46" text-anchor="middle">Validation</text>
+              <path class="d-arr" d="M 676 44 L 686 44" />
+              <rect class="d-box" x="688" y="18" width="56" height="52" rx="6" />
+              <text class="d-txt" x="716" y="38" text-anchor="middle">Export</text>
+              <text class="d-txt" x="716" y="52" text-anchor="middle">package</text>
+              <path class="d-arr" d="M 746 44 L 756 44" />
+              <rect class="d-box" x="758" y="24" width="88" height="40" rx="6" />
+              <text class="d-txt" x="802" y="46" text-anchor="middle">Distribution</text>
+              <path class="d-arr" d="M 848 44 L 858 44" />
+              <rect class="d-box" x="860" y="18" width="132" height="52" rx="6" />
+              <text class="d-txt" x="926" y="38" text-anchor="middle">Robot</text>
+              <text class="d-txt" x="926" y="52" text-anchor="middle">runtime</text>
+            </g>
+            <text class="d-txt" x="500" y="118" text-anchor="middle" fill="#9aa8b8" font-size="10">Полный путь: от намерения автора до выполнения на роботе</text>
+          </svg>
+        </div>
+        <p class="tech-layer">
+          Опциональная ветка обогащения: из хранилища в <strong>SimPlayback</strong> → <strong>Trajectory recorder</strong> →
+          <strong>DemonstrationDataset</strong> → снова в очередь обучения (имитация / гибрид с RL).
+        </p>
+      </section>
+
+      <section id="optional-branch" class="tech-layer" data-section>
+        <h2>Опциональная ветка данных</h2>
+        <p>
+          При проигрывании motion в симуляции можно логировать состояние и действие с частотой симуляции — это даёт демонстрации
+          с «истиной» физики для offline imitation или инициализации политики параллельно или до этапа чистого RL.
+        </p>
+        <div class="diagram" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 72" width="640" height="72">
+            <rect fill="#1a222d" stroke="#2d3a4a" stroke-width="1.5" x="4" y="16" width="100" height="40" rx="6" />
+            <text fill="#e8edf4" font-family="system-ui,sans-serif" font-size="11" x="54" y="40" text-anchor="middle">Artifact store</text>
+            <path stroke="#e6b35a" stroke-width="1.5" fill="none" marker-end="url(#om)" d="M 106 36 L 120 36" />
+            <defs><marker id="om" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><polygon points="0 0,6 3,0 6" fill="#e6b35a"/></marker></defs>
+            <rect fill="#1a222d" stroke="#2d3a4a" stroke-width="1.5" x="122" y="16" width="92" height="40" rx="6" />
+            <text fill="#e8edf4" font-family="system-ui,sans-serif" font-size="11" x="168" y="40" text-anchor="middle">SimPlayback</text>
+            <path stroke="#e6b35a" stroke-width="1.5" fill="none" marker-end="url(#om)" d="M 216 36 L 230 36" />
+            <rect fill="#1a222d" stroke="#2d3a4a" stroke-width="1.5" x="232" y="16" width="108" height="40" rx="6" />
+            <text fill="#e8edf4" font-family="system-ui,sans-serif" font-size="10" x="286" y="34" text-anchor="middle">Trajectory</text>
+            <text fill="#e8edf4" font-family="system-ui,sans-serif" font-size="10" x="286" y="46" text-anchor="middle">recorder</text>
+            <path stroke="#e6b35a" stroke-width="1.5" fill="none" marker-end="url(#om)" d="M 342 36 L 356 36" />
+            <rect fill="#1a222d" stroke="#2d3a4a" stroke-width="1.5" x="358" y="16" width="130" height="40" rx="6" />
+            <text fill="#e8edf4" font-family="system-ui,sans-serif" font-size="10" x="423" y="40" text-anchor="middle">DemonstrationDataset</text>
+            <path stroke="#e6b35a" stroke-width="1.5" fill="none" marker-end="url(#om)" d="M 490 36 L 504 36" />
+            <rect fill="#1a222d" stroke="#2d3a4a" stroke-width="1.5" x="506" y="16" width="118" height="40" rx="6" />
+            <text fill="#e8edf4" font-family="system-ui,sans-serif" font-size="11" x="565" y="40" text-anchor="middle">Training orchestrator</text>
+          </svg>
+        </div>
+      </section>
+
+      <section id="contracts" class="tech-layer" data-section>
+        <h2>Контракты между модулями</h2>
+        <p>Краткая таблица артефактов на границах системы (детали — в Phase 0 и схемах экспорта в репозитории).</p>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>От</th>
+                <th>К</th>
+                <th>Артефакт</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Authoring</td><td>Artifact store</td><td>keyframes, motion, scenario (JSON)</td></tr>
+              <tr><td>Artifact store</td><td>Preprocessor</td><td>снимок версии артефакта</td></tr>
+              <tr><td>Preprocessor</td><td>Training / Sim</td><td>ReferenceTrajectory v1</td></tr>
+              <tr><td>Sim playback</td><td>Trajectory recorder</td><td>DemonstrationDataset</td></tr>
+              <tr><td>Orchestrator</td><td>RL worker</td><td>конфиг job + пути к данным</td></tr>
+              <tr><td>RL worker</td><td>Validation</td><td>метрики + чекпоинты</td></tr>
+              <tr><td>Validation</td><td>Export</td><td>одобренный чекпоинт</td></tr>
+              <tr><td>Export</td><td>Distribution</td><td>пакет + manifest</td></tr>
+              <tr><td>Distribution</td><td>Robot runtime</td><td>загружаемый пакет</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="modules" data-section>
+        <h2>Модули: назначение и роль</h2>
+        <p>
+          Для каждого модуля ниже — коротко «что это даёт продукту»; технические входы и выходы — в раскрывающемся блоке.
+        </p>
+
+        <article class="module-card" id="mod-authoring">
+          <h3><span class="num">1.</span> Authoring UI / SDK</h3>
+          <p>
+            Инструмент, через который автор задаёт движение: позы, keyframes, сборка motion и сценариев.
+            Даёт предпросмотр в симуляции и остаётся <strong>источником истины для намерения</strong> пользователя; сам по себе не обязан запускать обучение.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> действия пользователя (ползунки, сохранение кадра, порядок действий в сценарии).</p>
+              <p><strong>Выходы:</strong> версионированные артефакты в хранилище (JSON keyframes, ссылки на motion, метаданные: робот, версия модели, пользователь, временные метки).</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-store">
+          <h3><span class="num">2.</span> Artifact store</h3>
+          <p>
+            Центральное хранилище контента: motion, сценарии, сырые keyframes с привязкой к проектам и пользователям.
+            Обеспечивает воспроизводимость и стабильные ссылки для препроцессора и симуляции.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> записи от Authoring UI, API.</p>
+              <p><strong>Выходы:</strong> стабильные URI/идентификаторы артефактов для препроцессора и симуляции. Желательна неизменяемость версий после публикации обучения.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-preprocessor">
+          <h3><span class="num">3.</span> Preprocessor service <span class="badge">MVP</span></h3>
+          <p>
+            Превращает разрежённые keyframes в <strong>референсную траекторию</strong> с фиксированной частотой (например 50 Гц) —
+            это «плотный» сигнал для симуляции и RL. Единая нумерация и порядок суставов снижают хаос на границах команд.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> keyframes и тайминги из Artifact store; конфиг робота (число DOF, лимиты для клиппинга при необходимости).</p>
+              <p><strong>Выходы:</strong> файл референса (например <code>.npz</code> / HDF5), контракт ReferenceTrajectory v1.</p>
+              <p><strong>Примечание:</strong> из одних только углов не выводятся «истинные» контакты ступней; границы MVP задаются контрактом (только суставы vs явная модель корня).</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-sim-playback">
+          <h3><span class="num">3a.</span> SimPlayback <span class="badge phase2">Фаза 2</span></h3>
+          <p>
+            Проигрывание плотного референса в симуляции (например MuJoCo для G1): предпросмотр и подготовка к записи демонстраций.
+            Помогает увидеть motion до дорогостоящего обучения.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> ReferenceTrajectory v1; MJCF; шаг <code>dt</code>; режим dynamic (PD) или kinematic.</p>
+              <p><strong>Выходы:</strong> визуальный прогон и/или детерминированный лог для проверки воспроизводимости.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-trajectory">
+          <h3><span class="num">4.</span> Trajectory recorder <span class="badge phase2">Фаза 2</span></h3>
+          <p>
+            При проигрывании motion логирует состояние и действие с частотой симуляции — <strong>демонстрации с физикой</strong>
+            для imitation learning или гибрида с RL, когда одного референса по суставам недостаточно.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> motion/scenario из хранилища или интерполированный референс; seed симуляции.</p>
+              <p><strong>Выходы:</strong> DemonstrationDataset v1 (эпизоды: наблюдения, действия, опционально референс, done, метаданные).</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-orchestrator">
+          <h3><span class="num">5.</span> Training orchestrator</h3>
+          <p>
+            Очередь задач обучения: кто, когда и на каких данных учится; ретраи, таймауты, лимиты параллелизма.
+            В продуктовом смысле — «диспетчер фабрики навыков», отделяющий API от тяжёлого GPU-воркера.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> задание (ID артефакта, тип: только референс / + демонстрации, гиперпараметры или пресеты).</p>
+              <p><strong>Выходы:</strong> job id, ссылки на логи и метрики, чекпоинты после успеха. В MVP репозитория: SQLite, asyncio-воркер в процессе FastAPI; горизонтальное масштабирование — возможное развитие.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-rl">
+          <h3><span class="num">6.</span> RL worker <span class="badge phase3">Контейнер</span></h3>
+          <p>
+            Изолированная среда обучения: параллельные среды симуляции, алгоритм (например PPO), награды за трекинг, выживание, энергию.
+            Здесь кинематика автора превращается в динамически согласованную политику.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> ReferenceTrajectory и/или DemonstrationDataset; конфиг среды и робота; сиды.</p>
+              <p><strong>Выходы:</strong> чекпоинты (<code>.pt</code>), лог метрик, финальные скаляры для Validation. Опционально этап behavior cloning перед PPO.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-validation">
+          <h3><span class="num">7.</span> Validation</h3>
+          <p>
+            Продуктовые пороги по метрикам: принять, отклонить или предупредить; человекочитаемое объяснение для UI
+            (например «сценарий может быть физически недостижим»). Защищает каталог от заведомо слабых пакетов.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> логи и метрики от RL worker; пороги политики продукта.</p>
+              <p><strong>Выходы:</strong> статус валидации, отчёт; при отказе — без публикации или с пометкой. Отдельно от контрактной валидации JSON (Phase 0).</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-export">
+          <h3><span class="num">8.</span> Export / packaging</h3>
+          <p>
+            Сборка <strong>пакета навыка</strong>: веса плюс обязательный <strong>manifest</strong> (наблюдения, нормализация, dt, версия робота/MJCF).
+            Без манифеста рантайм не может безопасно воспроизвести политику; опционально ONNX для внедрения без Python.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> лучший чекпоинт по метрикам; шаблон manifest.</p>
+              <p><strong>Выходы:</strong> архив в объектном хранилище; опционально проверка целостности.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-distribution">
+          <h3><span class="num">9.</span> Distribution</h3>
+          <p>
+            Каталог и выдача навыков: кто может видеть и скачивать пакет, публикация, в перспективе лицензии и маркетплейс.
+            Связывает обучение с монетизацией и сообществом.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> проверенный пакет от Export.</p>
+              <p><strong>Выходы:</strong> скачивание / подписка для клиента робота; метаданные валидации на карточке пакета (в MVP репозитория).</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="module-card" id="mod-runtime">
+          <h3><span class="num">10.</span> Robot runtime</h3>
+          <p>
+            На компьютере робота: загрузка пакета, сверка с manifest, инференс, формирование low-level команд в духе Unitree SDK,
+            аварийные ограничения и телеметрия. Точка, где продукт встречается с железом и безопасностью.
+          </p>
+          <details class="tech-layer">
+            <summary>Технические детали</summary>
+            <div class="detail-body">
+              <p><strong>Входы:</strong> сенсоры в формате, ожидаемом политикой (нужна согласованная калибровка с обучением).</p>
+              <p><strong>Выходы:</strong> команды моторам; опционально телеметрия на платформу. Слой безопасности: лимиты суставов, скоростей, моментов, emergency-stop.</p>
+            </div>
+          </details>
+        </article>
+      </section>
+
+      <section id="platform-web" data-section>
+        <h2>Веб-платформа (реализация MVP)</h2>
+        <p>
+          Реализация разнесена по <strong>двум репозиториям</strong>: бэкенд и SDK — <strong>AUROSY_creators_factory_platform</strong>
+          (<code>web/backend</code> — FastAPI, <code>unitree_sdk2_python</code>, документация в <code>docs/</code>);
+          браузерный <strong>Authoring UI</strong> (Vite + React) — <strong>AUROSY_creators_factory</strong>, каталог <code>web/frontend</code>
+          (сборка <code>npm run build</code> → <code>dist/</code>; в разработке Vite проксирует <code>/api</code> и <code>/ws</code> на бэкенд).
+        </p>
+        <p>
+          В репозитории платформы конвейер обучения и каталог пакетов для Skill Foundry реализованы в <code>web/backend</code>:
+          постановка задач в очередь, изолированные рабочие каталоги по пользователю, регистрация и скачивание пакетов.
+          Это не замена спецификациям фаз 0–6, а <strong>текущий продуктовый контур</strong> вокруг CLI и воркеров обучения.
+          Docker-образ в этом репо собирает только API (без SPA).
+        </p>
+        <ul>
+          <li><strong>Очередь:</strong> SQLite; асинхронный воркер в процессе API; статусы job <code>queued</code> → <code>running</code> → <code>succeeded</code> / <code>failed</code>.</li>
+          <li><strong>Изоляция:</strong> файлы задач под <code>users/&lt;user_id&gt;/jobs/&lt;job_id&gt;/</code>; артефакты и пакеты — в отдельных подкаталогах пользователя.</li>
+          <li><strong>Каталог:</strong> список и скачивание только своих или опубликованных пакетов; публикация может требовать успешной продуктовой валидации (контролируется настройками окружения).</li>
+          <li><strong>Идентификация (MVP):</strong> заголовок <code>X-User-Id</code>; в разработке возможен fallback <code>G1_DEV_USER_ID</code> — не для продакшена.</li>
+        </ul>
+        <p class="tech-layer">
+          Концепция Phase 5 (оркестратор, каталог): <code>docs/archive/11_phase5_platform.md</code>.
+          Актуальный список маршрутов HTTP/WebSocket, переменные <code>G1_*</code> и сценарий деплоя — <code>web/README.md</code>
+          в корне AUROSY_creators_factory_platform; данные и контракты для фронтенда — <code>docs/frontend_developer_guide.md</code>.
+        </p>
+      </section>
+
+      <section id="limitations" data-section>
+        <h2>Честные ограничения</h2>
+        <div class="callout">
+          <p><strong>Корень и ступни.</strong> Если заданы только углы суставов, положение базы и контакты на каждом шаге не определены однозначно без модели контактов. В MVP платформа явно фиксирует допущения (например референс только по суставам, отдельные правила для корня или траектория из полной сим-прокрутки).</p>
+          <p><strong>Формат на роботе.</strong> Файл весов сам по себе не описывает интерфейс с приводами; без manifest и согласованного рантайма политика непереносима.</p>
+          <p><strong>Sim2real.</strong> Идеальное поведение в симуляции не гарантирует то же на железе без калибровки, рандомизации при обучения и/или дообучения.</p>
+          <p><strong>UGC и безопасность.</strong> Пользовательский сценарий может быть недостижим или опасен; нужны статусы по метрикам и предохранители на рантайме.</p>
+        </div>
+      </section>
+
+      <section id="sources" data-section>
+        <h2>Источники в репозитории</h2>
+        <ul class="sources-list">
+          <li><a href="./skill_foundry/01_vision_and_approach.md">docs/skill_foundry/01_vision_and_approach.md</a> — видение и подход</li>
+          <li><a href="./skill_foundry/02_architecture.md">docs/skill_foundry/02_architecture.md</a> — архитектура модулей (в т.ч. §11 про два репозитория и деплой)</li>
+          <li><a href="./skill_foundry/03_implementation_plan.md">docs/skill_foundry/03_implementation_plan.md</a> — план по фазам и продакшен на VPS</li>
+          <li><a href="./archive/11_phase5_platform.md">docs/archive/11_phase5_platform.md</a> — платформа Phase 5 (оркестратор и каталог); детали API — <a href="../web/README.md">web/README.md</a></li>
+          <li><a href="./frontend_developer_guide.md">docs/frontend_developer_guide.md</a> — данные, API и UX для UI (SPA во втором репозитории)</li>
+          <li><a href="../web/README.md">web/README.md</a> — запуск бэкенда, сводка API, связка с репозиторием фронтенда</li>
+        </ul>
+      </section>
+
+      <footer>
+        Документ отражает концепцию и текущую раскладку репозиториев. При расхождении с кодом приоритет имеют OpenAPI бэкенда, <code>web/README.md</code>, а также <code>docs/skill_foundry/</code> и <code>docs/archive/</code> для спецификаций по фазам.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      var compact = document.getElementById('compact-toggle');
+      if (compact) {
+        compact.addEventListener('change', function () {
+          document.body.classList.toggle('compact', compact.checked);
+        });
+      }
+
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll('#toc a[href^="#"]'));
+      var sectionIds = navLinks.map(function (a) {
+        return a.getAttribute('href').slice(1);
+      }).filter(function (id) {
+        if (!id) return false;
+        if (id.indexOf('mod-') === 0) return false;
+        return true;
+      });
+
+      var sections = sectionIds.map(function (id) {
+        return document.getElementById(id);
+      }).filter(Boolean);
+
+      function setActive(id) {
+        navLinks.forEach(function (a) {
+          var href = a.getAttribute('href').slice(1);
+          a.classList.toggle('active', href === id);
+        });
+      }
+
+      if (sections.length && 'IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting && entry.intersectionRatio > 0) {
+                setActive(entry.target.id);
+              }
+            });
+          },
+          { root: null, rootMargin: '-20% 0px -55% 0px', threshold: [0, 0.1, 0.25, 0.5, 1] }
+        );
+        sections.forEach(function (el) { observer.observe(el); });
+      }
+
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        if (t.closest && t.closest('#toc a[href^="#"]')) {
+          var href = t.closest('a').getAttribute('href');
+          if (href && href.length > 1) {
+            setActive(href.slice(1));
+          }
+        }
+      }, true);
+    })();
+  </script>
+</body>
+</html>

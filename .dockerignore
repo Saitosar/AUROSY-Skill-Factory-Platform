@@ -1,0 +1,14 @@
+# Used when building docker/skill_foundry_rl/Dockerfile with context = repo root.
+.git
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+**/*.egg-info
+.pytest_cache
+.mypy_cache
+
+# Not needed for RL smoke image (only unitree_sdk2_python is COPY'd)
+docs
+unitree_mujoco
+unitree_sdk2/.devcontainer

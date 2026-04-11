@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.12/bin/skill-foundry-train", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/Users/sarkhan/AUROSY_creators_factory_platform/unitree_sdk2_python/skill_foundry_rl/cli.py", line 112, in main
+    payload = run_smoke_train(
+              ^^^^^^^^^^^^^^^^
+  File "/Users/sarkhan/AUROSY_creators_factory_platform/unitree_sdk2_python/skill_foundry_rl/smoke_train.py", line 65, in run_smoke_train
+    raise ValueError("Invalid reference_trajectory.json:\n" + "\n".join(ref_errors))
+ValueError: Invalid reference_trajectory.json:
+reference: schema_version must be 1.0.0
+reference: units.angle must be radians
+reference: units.time must be seconds
+reference: frequency_hz must be > 0
+reference: root_model must be root_not_in_reference
+reference: joint_order must be non-empty list
+reference: joint_positions must be non-empty list

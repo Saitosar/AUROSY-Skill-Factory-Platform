@@ -1,0 +1,35 @@
+{
+  "mode": "train",
+  "seed": 42,
+  "output_dir": "/out/ppo_run",
+  "env": {
+    "mjcf_path": "/mujoco/unitree_robots/g1/scene_29dof.xml",
+    "sim_dt": 0.005,
+    "kp": 150.0,
+    "kd": 5.0,
+    "delta_max": 0.25,
+    "min_base_height": 0.2,
+    "max_episode_steps": 500,
+    "include_imu_in_obs": false,
+    "reward_weights": {
+      "w_track": 1.0,
+      "w_alive": 0.02,
+      "w_energy": 1.0e-5,
+      "w_jerk": 1.0e-6
+    }
+  },
+  "ppo": {
+    "learning_rate": 0.0003,
+    "n_steps": 256,
+    "batch_size": 64,
+    "n_epochs": 2,
+    "gamma": 0.99,
+    "total_timesteps": 512
+  },
+  "early_stop": {
+    "eval_freq": 0,
+    "val_seed": 43,
+    "plateau_patience": 0,
+    "plateau_min_delta": 0.01
+  }
+}

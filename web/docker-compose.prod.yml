@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: web/Dockerfile
+    image: aurosy-skill-foundry-api:latest
+    container_name: aurosy-skill-foundry-api
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    volumes:
+      - skill_foundry_data:/opt/app/web/backend/data/platform
+    networks:
+      - skill-foundry-network
+      - talaix-network
+    ports:
+      - "127.0.0.1:8001:8000"
+
+networks:
+  skill-foundry-network:
+    driver: bridge
+  talaix-network:
+    external: true
+    name: hrtech-talaix_talaix-network
+
+volumes:
+  skill_foundry_data:
+    name: aurosy_skill_foundry_data

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "robot_model": "g1_29dof",
+  "units": {
+    "angle": "degrees",
+    "time": "seconds"
+  },
+  "frequency_hz": 50,
+  "root_model": "unknown_root_mode",
+  "joint_order": ["0", "1", "2"],
+  "joint_positions": [
+    [0.0, 0.1, -0.1],
+    [0.1, 0.2]
+  ]
+}
+

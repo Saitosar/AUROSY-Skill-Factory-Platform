@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-foundry/authoring/motion-v1",
+  "title": "Motion v1",
+  "type": "object",
+  "required": ["schema_version", "motion_id", "source_keyframes_id", "keyframe_timestamps_s"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "motion_id": { "type": "string", "minLength": 1 },
+    "source_keyframes_id": { "type": "string", "minLength": 1 },
+    "keyframe_timestamps_s": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "number", "minimum": 0 }
+    },
+    "metadata": { "type": "object" }
+  },
+  "additionalProperties": false
+}
+

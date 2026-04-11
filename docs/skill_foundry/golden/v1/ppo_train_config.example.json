@@ -1,0 +1,42 @@
+{
+  "mode": "train",
+  "seed": 42,
+  "output_dir": "./ppo_run_out",
+  "env": {
+    "mjcf_path": "/absolute/or/mounted/path/to/unitree_mujoco/unitree_robots/g1/scene_29dof.xml",
+    "sim_dt": 0.005,
+    "kp": 150.0,
+    "kd": 5.0,
+    "delta_max": 0.25,
+    "min_base_height": 0.35,
+    "max_episode_steps": null,
+    "include_imu_in_obs": false,
+    "reward_weights": {
+      "w_track": 1.0,
+      "w_alive": 0.02,
+      "w_energy": 1.0e-5,
+      "w_jerk": 1.0e-6
+    }
+  },
+  "ppo": {
+    "learning_rate": 0.0003,
+    "n_steps": 2048,
+    "batch_size": 256,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "total_timesteps": 100000
+  },
+  "early_stop": {
+    "eval_freq": 4096,
+    "val_seed": 43,
+    "plateau_patience": 0,
+    "plateau_min_delta": 0.01
+  },
+  "bc": {
+    "enabled": false,
+    "demonstration_dataset": "/path/to/demonstration_dataset.json",
+    "epochs": 20,
+    "batch_size": 256,
+    "learning_rate": 0.001
+  }
+}

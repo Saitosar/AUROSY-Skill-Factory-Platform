@@ -1,0 +1,53 @@
+{
+  "package_version": "1.0.0",
+  "manifest_schema_ref": "skill_foundry_export_manifest_v1",
+  "observation": {
+    "obs_schema_ref": "skill_foundry_rl_tracking_v1",
+    "vector_dim": 87,
+    "normalization": "none",
+    "blocks": [
+      { "name": "motor_q", "offset": 0, "length": 29 },
+      { "name": "motor_dq", "offset": 29, "length": 29 },
+      { "name": "tracking_error", "offset": 58, "length": 29 }
+    ]
+  },
+  "action": {
+    "space": "box",
+    "dim": 29,
+    "low": -1.0,
+    "high": 1.0,
+    "residual_scale_rad": 0.25
+  },
+  "control": {
+    "dt_s": 0.005,
+    "kp": 150.0,
+    "kd": 5.0
+  },
+  "robot": {
+    "profile": "unitree_g1_29dof",
+    "robot_model": "g1_29dof",
+    "mjcf_path": "/path/to/scene_29dof.xml",
+    "mjcf_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "joint_order": ["0", "1", "2"],
+  "reference_trajectory": {
+    "filename": "reference_trajectory.json",
+    "schema_ref": "reference_trajectory_v1"
+  },
+  "weights": {
+    "format": "stable_baselines3_ppo_zip",
+    "filename": "ppo_G1TrackingEnv.zip",
+    "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "policy_weights_pt": {
+    "filename": "policy_weights.pt",
+    "description": "Torch state_dict of the policy MLP (optional; for lightweight loaders)."
+  },
+  "onnx": null,
+  "provenance": {
+    "reference_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "train_config_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "phase": "3.2_ppo",
+    "torch_version": "2.2.0"
+  }
+}

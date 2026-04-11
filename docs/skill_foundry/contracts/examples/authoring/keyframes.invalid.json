@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "robot_model": "g1_29dof",
+  "units": {
+    "angle": "radians",
+    "time": "seconds"
+  },
+  "keyframes": [
+    {
+      "timestamp_s": 1.0,
+      "joints_deg": {
+        "left_hip_pitch": 0.0
+      }
+    },
+    {
+      "timestamp_s": 0.5,
+      "joints_deg": {
+        "0": 1.0
+      }
+    }
+  ]
+}
+
