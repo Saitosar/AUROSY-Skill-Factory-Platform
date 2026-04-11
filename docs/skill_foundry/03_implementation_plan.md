@@ -2,7 +2,7 @@
 
 Документ связывает **фазы** конвейера с детальными спецификациями в [`../archive/`](../archive/). Архитектура модулей: [02_architecture.md](02_architecture.md). Видение: [01_vision_and_approach.md](01_vision_and_approach.md).
 
-**Репозитории:** бэкенд и SDK — **AUROSY_creators_factory_platform** (этот репозиторий: `web/backend`, `unitree_sdk2_python`). SPA — **AUROSY_creators_factory** (`web/frontend`). Публичное зеркало/историческое имя клона может отличаться; ориентируйтесь на фактический `git remote` и структуру каталогов ниже.
+**Репозитории:** бэкенд и SDK — **AUROSY_creators_factory_platform** (этот репозиторий: `web/backend`, сабмодуль `unitree_sdk2_python` для upstream `unitree_sdk2py`, каталог `packages/skill_foundry` для AUROSY Skill Foundry). SPA — **AUROSY_creators_factory** (`web/frontend`). Публичное зеркало/историческое имя клона может отличаться; ориентируйтесь на фактический `git remote` и структуру каталогов ниже.
 
 ---
 
@@ -57,16 +57,18 @@ git clone <url-frontend> AUROSY_creators_factory
 Из [`web/README.md`](../../web/README.md):
 
 ```bash
+cd /abs/path/to/AUROSY_creators_factory_platform
+pip install -e "./unitree_sdk2_python"
+pip install -e "./packages/skill_foundry[export]"
 cd web/backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export PYTHONPATH="/abs/path/to/AUROSY_creators_factory_platform/unitree_sdk2_python"
 # при необходимости:
 # export G1_REPO_ROOT="/abs/path/to/AUROSY_creators_factory_platform"
 ```
 
-Путь к `unitree_sdk2_python` должен существовать в клоне платформы или задаваться через `G1_SDK_PYTHON_ROOT`.
+Каталоги `unitree_sdk2_python` и `packages/skill_foundry` должны существовать в клоне или задаваться через `G1_SDK_PYTHON_ROOT` / `G1_SKILL_FOUNDRY_PYTHON_ROOT`. Бэкенд при запуске пайплайна сам выставляет объединённый `PYTHONPATH` для подпроцессов.
 
 ### 4. Сборка фронтенда
 

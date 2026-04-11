@@ -1,6 +1,6 @@
 # G1 Control Web API (Skill Foundry backend)
 
-В этом репозитории (**AUROSY_creators_factory_platform**) — **бэкенд** FastAPI, SDK `unitree_sdk2_python` и документация. **SPA (Vite + React)** живёт в отдельном репозитории **AUROSY_creators_factory** (`web/frontend/`); см. `web/README.md` в корне того репозитория (типичный соседний клон: `../AUROSY_creators_factory/web/README.md`).
+В этом репозитории (**AUROSY_creators_factory_platform**) — **бэкенд** FastAPI, сабмодуль **Unitree** `unitree_sdk2_python` (upstream `unitree_sdk2py`), пакет **AUROSY** `packages/skill_foundry` (CLI `skill-foundry-*`) и документация. **SPA (Vite + React)** живёт в отдельном репозитории **AUROSY_creators_factory** (`web/frontend/`); см. `web/README.md` в корне того репозитория (типичный соседний клон: `../AUROSY_creators_factory/web/README.md`).
 
 Функциональность: авторинг Phase 0, телеметрия (mock WebSocket / DDS), сценарии mid/high level, CLI `skill-foundry-*`, Phase 5 (очередь обучения, каталог пакетов).
 
@@ -13,7 +13,10 @@ cd web/backend
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-export PYTHONPATH="/abs/path/to/AUROSY_creators_factory_platform/unitree_sdk2_python"
+# Рекомендуется из корня репозитория платформы (один раз на venv; из web/backend: cd ../..):
+#   pip install -e "./unitree_sdk2_python" && pip install -e "./packages/skill_foundry[export]"
+# Для ручного запуска CLI без pip install можно выставить:
+#   export PYTHONPATH="/abs/path/to/AUROSY_creators_factory_platform/packages/skill_foundry:/abs/path/to/AUROSY_creators_factory_platform/unitree_sdk2_python"
 export G1_REPO_ROOT="/abs/path/to/AUROSY_creators_factory_platform"   # опционально; по умолчанию вычисляется из app/config.py
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
@@ -23,6 +26,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 | Переменная | Описание |
 |------------|----------|
 | `G1_SDK_PYTHON_ROOT` | Путь к `unitree_sdk2_python` (если не рядом с репо) |
+| `G1_SKILL_FOUNDRY_PYTHON_ROOT` | Путь к `packages/skill_foundry` (если не рядом с репо) |
 | `G1_MJCF_PATH` | MJCF для playback (по умолчанию ищется `unitree_mujoco/.../scene_29dof.xml`) |
 | `G1_TELEMETRY_MOCK_HZ` | Частота mock WebSocket (по умолчанию 10) |
 | `G1_USE_DDS_TELEMETRY` | `1` для DDS (не реализовано в этой сборке) |
@@ -44,7 +48,7 @@ OpenAPI: `http://127.0.0.1:8000/docs`
 **Общие**
 
 - `GET /api/health` — `{ "status": "ok" }`
-- `GET /api/meta` — `repo_root`, `sdk_python_root`, `mjcf_default`, `telemetry_mode` (`mock` / `dds`), `platform_worker_enabled`, `job_timeout_sec`, `dds_joint_bridge`, `dds_joint_publish_hz`, `joint_command_enabled` (и связанные поля при расширении joint API)
+- `GET /api/meta` — `repo_root`, `sdk_python_root`, `skill_foundry_python_root`, `mjcf_default`, `telemetry_mode` (`mock` / `dds`), `platform_worker_enabled`, `job_timeout_sec`, `dds_joint_bridge`, `dds_joint_publish_hz`, `joint_command_enabled` (и связанные поля при расширении joint API)
 
 **Суставы и пайплайн**
 

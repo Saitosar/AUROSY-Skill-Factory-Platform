@@ -10,7 +10,6 @@ that behaviour for the browser Motion Studio.
 from __future__ import annotations
 
 import logging
-import sys
 import threading
 import time
 from typing import TYPE_CHECKING
@@ -24,10 +23,12 @@ NUM_HG_MOTORS = 35
 
 
 def _loop(settings: Settings, stop: threading.Event) -> None:
-    sdk = settings.resolved_sdk_root()
-    root = str(sdk)
-    if root not in sys.path:
-        sys.path.insert(0, root)
+    from app.services.sdk_path import ensure_sdk_on_path
+
+    ensure_sdk_on_path(
+        settings.resolved_sdk_root(),
+        settings.resolved_skill_foundry_root(),
+    )
 
     try:
         from core_control.joint_controller import JointController

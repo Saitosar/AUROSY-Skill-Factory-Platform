@@ -39,7 +39,7 @@ Rules:
 
 ## 3) Canonical joint order (G1 29DoF profile)
 
-Source: `unitree_sdk2_python/core_control/joint_controller.py` (`JointController.JOINT_MAP`).
+Source: `packages/skill_foundry/core_control/joint_controller.py` (`JointController.JOINT_MAP`).
 
 - 0: left_hip_pitch
 - 1: left_hip_roll
@@ -73,7 +73,7 @@ Source: `unitree_sdk2_python/core_control/joint_controller.py` (`JointController
 
 ## 4) Compatibility note with existing repository data
 
-Current motion packs in `unitree_sdk2_python/mid_level_motions/**/pose.json` are legacy pose-only arrays and do not contain:
+Current motion packs in `packages/skill_foundry/mid_level_motions/**/pose.json` are legacy pose-only arrays and do not contain:
 
 - `schema_version`
 - units metadata
@@ -94,8 +94,8 @@ This section is **JSON schema validation** for authoring and dataset files. **Pr
 
 Reference validator implementation:
 
-- `unitree_sdk2_python/skill_foundry_phase0/contract_validator.py`
-- `unitree_sdk2_python/skill_foundry_phase0/tests/test_contract_validator.py`
+- `packages/skill_foundry/skill_foundry_phase0/contract_validator.py`
+- `packages/skill_foundry/skill_foundry_phase0/tests/test_contract_validator.py`
 
 The validator checks:
 
@@ -109,7 +109,7 @@ The validator checks:
 
 ## 6) Preprocessing CLI (phase 1.2)
 
-Implementation: `unitree_sdk2_python/skill_foundry_preprocessing/cli.py`.
+Implementation: `packages/skill_foundry/skill_foundry_preprocessing/cli.py`.
 
 **Flow:** `keyframes.json` on disk → dense **`reference_trajectory.json`** (ReferenceTrajectory v1) + **`preprocess_run.json`** (reproducibility metadata).
 
@@ -117,8 +117,8 @@ Implementation: `unitree_sdk2_python/skill_foundry_preprocessing/cli.py`.
 
 | Invocation | Notes |
 |------------|--------|
-| `skill-foundry-preprocess <path/to/keyframes.json>` | Console script (after `pip install -e .` from `unitree_sdk2_python`). |
-| `python -m skill_foundry_preprocessing <path/to/keyframes.json>` | Same behavior; run with `unitree_sdk2_python` on `PYTHONPATH` or from an editable install. |
+| `skill-foundry-preprocess <path/to/keyframes.json>` | Console script (after editable install of `packages/skill_foundry` + `unitree_sdk2_python` from the platform repo). |
+| `python -m skill_foundry_preprocessing <path/to/keyframes.json>` | Same behavior; run with `packages/skill_foundry` and `unitree_sdk2_python` on `PYTHONPATH` or from editable installs. |
 
 ### Arguments (see `--help`)
 
@@ -145,10 +145,11 @@ Implementation: `unitree_sdk2_python/skill_foundry_preprocessing/cli.py`.
 
 ### Example
 
-From the `unitree_sdk2_python` directory after editable install:
+From the **platform repository root** after editable installs:
 
 ```bash
-pip install -e .
+pip install -e "./unitree_sdk2_python"
+pip install -e "./packages/skill_foundry"
 skill-foundry-preprocess ./path/to/keyframes.json -o ./out/reference_trajectory.json --frequency-hz 50 --run-log ./out/preprocess_run.json
 ```
 

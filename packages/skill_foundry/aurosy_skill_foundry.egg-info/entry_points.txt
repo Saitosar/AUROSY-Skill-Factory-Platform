@@ -1,0 +1,8 @@
+[console_scripts]
+skill-foundry-package = skill_foundry_export.cli:main
+skill-foundry-playback = skill_foundry_sim.cli:main
+skill-foundry-preprocess = skill_foundry_preprocessing.cli:main
+skill-foundry-runtime = skill_foundry_runtime.cli:main
+skill-foundry-train = skill_foundry_rl.cli:main
+skill-foundry-validate = skill_foundry_rl.validate_cli:main
+skill-foundry-validate-motion = skill_foundry_validation.cli:main

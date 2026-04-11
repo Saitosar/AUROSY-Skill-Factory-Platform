@@ -1,0 +1,10 @@
+core_control
+high_level_motions
+mid_level_motions
+skill_foundry_export
+skill_foundry_phase0
+skill_foundry_preprocessing
+skill_foundry_rl
+skill_foundry_runtime
+skill_foundry_sim
+skill_foundry_validation

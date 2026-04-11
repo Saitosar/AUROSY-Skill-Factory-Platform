@@ -11,8 +11,8 @@
 ### 1.1 Канонический порядок суставов
 
 - Индексы моторов **0–28** (29 степеней свободы).
-- Человекочитаемые имена и семантика — в [`unitree_sdk2_python/core_control/joint_controller.py`](../unitree_sdk2_python/core_control/joint_controller.py) (`JOINT_MAP`).
-- Лимиты углов и скоростей — [`unitree_sdk2_python/core_control/config/joint_limits.py`](../unitree_sdk2_python/core_control/config/joint_limits.py).
+- Человекочитаемые имена и семантика — в [`packages/skill_foundry/core_control/joint_controller.py`](../packages/skill_foundry/core_control/joint_controller.py) (`JOINT_MAP`).
+- Лимиты углов и скоростей — [`packages/skill_foundry/core_control/config/joint_limits.py`](../packages/skill_foundry/core_control/config/joint_limits.py).
 
 ### 1.2 Группы для UI (как в Pose Studio)
 
@@ -30,8 +30,8 @@
 
 ### 1.3 Телеметрия и команды (низкий уровень)
 
-- **Телеметрия:** топик DDS `rt/lowstate` — позиции `motor_state[i].q` (радианы), опционально IMU. Реализация: [`StateListener`](../unitree_sdk2_python/core_control/state_listener.py).
-- **Команды:** топик `rt/lowcmd` — PD по суставам (`q`, `kp`, `kd`). Реализация: [`JointController`](../unitree_sdk2_python/core_control/joint_controller.py).
+- **Телеметрия:** топик DDS `rt/lowstate` — позиции `motor_state[i].q` (радианы), опционально IMU. Реализация: [`StateListener`](../packages/skill_foundry/core_control/state_listener.py).
+- **Команды:** топик `rt/lowcmd` — PD по суставам (`q`, `kp`, `kd`). Реализация: [`JointController`](../packages/skill_foundry/core_control/joint_controller.py).
 
 В браузере прямой доступ к DDS невозможен; нужен **бэкенд-мост** (см. раздел 5).
 
@@ -104,9 +104,9 @@
 
 ### 2.3 Связь с legacy-контентом репозитория
 
-В [`unitree_sdk2_python/mid_level_motions/`](../unitree_sdk2_python/mid_level_motions/) лежат пакеты `basic_actions/` и `complex_actions/` с `execute.py` + `pose.json`. Часто это **legacy**: без `schema_version`, таймкодов в стиле Phase 0. Путь миграции описан в [04_phase0_contracts.md](archive/04_phase0_contracts.md) (раздел совместимости).
+В [`packages/skill_foundry/mid_level_motions/`](../packages/skill_foundry/mid_level_motions/) лежат пакеты `basic_actions/` и `complex_actions/` с `execute.py` + `pose.json`. Часто это **legacy**: без `schema_version`, таймкодов в стиле Phase 0. Путь миграции описан в [04_phase0_contracts.md](archive/04_phase0_contracts.md) (раздел совместимости).
 
-High-level сценарии (формат Scenario Studio): [`unitree_sdk2_python/high_level_motions/{name}/scenario.json`](../unitree_sdk2_python/high_level_motions/) — ноды ссылаются на mid-level действия. Логика запуска: [`tools/scenario_studio/runner.py`](../unitree_sdk2_python/tools/scenario_studio/runner.py).
+High-level сценарии (формат Scenario Studio): [`packages/skill_foundry/high_level_motions/{name}/scenario.json`](../packages/skill_foundry/high_level_motions/) — ноды ссылаются на mid-level действия. Логика запуска: [`tools/scenario_studio/runner.py`](../packages/skill_foundry/tools/scenario_studio/runner.py).
 
 ---
 
@@ -126,23 +126,23 @@ High-level сценарии (формат Scenario Studio): [`unitree_sdk2_pytho
 
 Такой подход **снижает когнитивную нагрузку**, ускоряет создание движений и совместим с данными API: внутри по-прежнему те же индексы и JSON, меняется только **слой представления**.
 
-### 3.1 Pose Studio — [`tools/pose_studio.py`](../unitree_sdk2_python/tools/pose_studio.py) и веб Motion Studio
+### 3.1 Pose Studio — [`tools/pose_studio.py`](../packages/skill_foundry/tools/pose_studio.py) и веб Motion Studio
 
 **Десктоп (`pose_studio.py`):**
 
 - Группы суставов (см. §1.2), шаг редактирования угла порядка **0.5°**.
 - Отображение текущих углов из телеметрии vs целевые команды.
-- Слоты keyframes (до 3), экспорт в `pose.json` и генерация `execute.py` через [`action_exporter.py`](../unitree_sdk2_python/tools/action_exporter.py).
+- Слоты keyframes (до 3), экспорт в `pose.json` и генерация `execute.py` через [`action_exporter.py`](../packages/skill_foundry/tools/action_exporter.py).
 
 **Веб (`AUROSY_creators_factory/web/frontend/src/pages/PoseStudio.tsx`):**
 
 - Режим **3D MuJoCo (WASM)**: до **двух** дополнительных снимков поз («Добавить позу») вместе с **текущей** позой в симуляторе — до **трёх** keyframes в одном Phase 0 документе при отправке в Авторинг / Конвейер / `POST /api/platform/pose-drafts`.
 - Скачивание **`pose.json` (SDK)** — тот же legacy-формат, что и у `save_action`: JSON-массив объектов с ключами `"0"`…`"28"` в градусах; дальше можно положить файл рядом с `execute.py` из `complex_actions|basic_actions/<name>/` или сгенерировать папку действия локально через `action_exporter.save_action`.
-- **Создать движение** — только предпросмотр в браузере: плавная интерполяция углов (аналог духа [`atomic_move.py`](../unitree_sdk2_python/core_control/low_level_motions/atomic_move.py)), без вызова DDS/робота из этого UI.
+- **Создать движение** — только предпросмотр в браузере: плавная интерполяция углов (аналог духа [`atomic_move.py`](../packages/skill_foundry/core_control/low_level_motions/atomic_move.py)), без вызова DDS/робота из этого UI.
 
 - Для пользовательского UI см. §3.0: визуал и подписи **рядом с зонами тела** важнее таблицы «все 29 рядов цифр».
 
-### 3.2 Scenario Studio — [`tools/scenario_studio/app.py`](../unitree_sdk2_python/tools/scenario_studio/app.py)
+### 3.2 Scenario Studio — [`tools/scenario_studio/app.py`](../packages/skill_foundry/tools/scenario_studio/app.py)
 
 - Библиотия действий: папки с `execute.py` под `mid_level_motions/{basic_actions|complex_actions}/`.
 - Нода: `subdir`, `action_name`, `speed`, `repeat`.
@@ -151,14 +151,14 @@ High-level сценарии (формат Scenario Studio): [`unitree_sdk2_pytho
 
 ### 3.3 Низкоуровневые паттерны
 
-- Плавное движение одного сустава: [`atomic_move.py`](../unitree_sdk2_python/core_control/low_level_motions/atomic_move.py).
-- Ручное управление одним суставом (клавиши): [`manual_control.py`](../unitree_sdk2_python/core_control/low_level_motions/manual_control.py).
+- Плавное движение одного сустава: [`atomic_move.py`](../packages/skill_foundry/core_control/low_level_motions/atomic_move.py).
+- Ручное управление одним суставом (клавиши): [`manual_control.py`](../packages/skill_foundry/core_control/low_level_motions/manual_control.py).
 
 ---
 
 ## 4. Конвейер Skill Foundry (CLI)
 
-Точки входа из [`unitree_sdk2_python/setup.py`](../unitree_sdk2_python/setup.py):
+Точки входа объявлены в [`packages/skill_foundry/pyproject.toml`](../packages/skill_foundry/pyproject.toml) (`[project.scripts]`).
 
 | Команда | Назначение |
 |---------|------------|
@@ -169,9 +169,9 @@ High-level сценарии (формат Scenario Studio): [`unitree_sdk2_pytho
 | `skill-foundry-package` | Сборка skill bundle (`manifest.json` + веса) — см. [10_phase4_manifest_export.md](archive/10_phase4_manifest_export.md) |
 | `skill-foundry-runtime` | Загрузка пакета, проверки целостности, цикл в симе или на железе — см. [13_phase6_runtime_security.md](skill_foundry/13_phase6_runtime_security.md) |
 
-Параметры playback, важные для форм UI: `--mjcf`, `--mode` (`dynamic` | `kinematic`), `--dt`, `--kp`, `--kd`, `--seed`, `-o`, `--demonstration-json` — см. [`skill_foundry_sim/cli.py`](../unitree_sdk2_python/skill_foundry_sim/cli.py).
+Параметры playback, важные для форм UI: `--mjcf`, `--mode` (`dynamic` | `kinematic`), `--dt`, `--kp`, `--kd`, `--seed`, `-o`, `--demonstration-json` — см. [`skill_foundry_sim/cli.py`](../packages/skill_foundry/skill_foundry_sim/cli.py).
 
-Валидация Phase 0 на сервере: [`skill_foundry_phase0/contract_validator.py`](../unitree_sdk2_python/skill_foundry_phase0/contract_validator.py).
+Валидация Phase 0 на сервере: [`skill_foundry_phase0/contract_validator.py`](../packages/skill_foundry/skill_foundry_phase0/contract_validator.py).
 
 ---
 

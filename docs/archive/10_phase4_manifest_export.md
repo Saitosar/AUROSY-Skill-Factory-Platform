@@ -42,8 +42,9 @@ Key fields:
 Install (same repo as RL worker):
 
 ```bash
-cd unitree_sdk2_python
-pip install -e ".[rl,export]"
+cd /path/to/AUROSY_creators_factory_platform
+pip install -e "./unitree_sdk2_python"
+pip install -e "./packages/skill_foundry[rl,export]"
 ```
 
 Create a package:
@@ -72,13 +73,13 @@ Recompute SHA-256 of the MJCF file you will use on the robot and compare to `man
 
 - Loading the **SB3 zip** in Python: `stable_baselines3.PPO.load(...)` — observation vector must match `manifest.observation` (same layout as `G1TrackingEnv`).
 - **ONNX** export traces the **mean action** head (see `skill_foundry_export/onnx_export.py`); stochastic sampling is not in the ONNX graph.
-- Phase **4.2** ([03_implementation_plan.md](03_implementation_plan.md)) consumes this package in **Robot runtime** (`skill_foundry_runtime`): `pip install -e ".[runtime]"` then `skill-foundry-runtime run --package ... --mjcf ...` (`--mode mujoco` or `--mode dds`). The archive includes `reference_trajectory.json`; override with `--reference` only if the file matches `provenance.reference_sha256`.
+- Phase **4.2** ([03_implementation_plan.md](03_implementation_plan.md)) consumes this package in **Robot runtime** (`skill_foundry_runtime`): `pip install -e "./packages/skill_foundry[runtime]"` (и `-e "./unitree_sdk2_python"`) затем `skill-foundry-runtime run --package ... --mjcf ...` (`--mode mujoco` or `--mode dds`). The archive includes `reference_trajectory.json`; override with `--reference` only if the file matches `provenance.reference_sha256`.
 
 ## Related code
 
-- `unitree_sdk2_python/skill_foundry_export/` — manifest builder, `package_skill`, ONNX helper, CLI
-- `unitree_sdk2_python/skill_foundry_rl/obs_schema.py` — must stay aligned with `manifest.observation`
-- `unitree_sdk2_python/skill_foundry_rl/ppo_train.py` — writes extended `train_run.json` for export
+- `packages/skill_foundry/skill_foundry_export/` — manifest builder, `package_skill`, ONNX helper, CLI
+- `packages/skill_foundry/skill_foundry_rl/obs_schema.py` — must stay aligned with `manifest.observation`
+- `packages/skill_foundry/skill_foundry_rl/ppo_train.py` — writes extended `train_run.json` for export
 
 ## Definition of done (task 4.1)
 

@@ -16,15 +16,16 @@ Use this checklist before starting Phase 1 preprocessing implementation.
 - [x] Canonical joint order source is documented (`JointController.JOINT_MAP`).
 - [x] Golden bundle exists in `docs/skill_foundry/golden/v1`.
 - [x] Validator script exists:
-  - `unitree_sdk2_python/skill_foundry_phase0/validate_phase0_contracts.py`
+  - `packages/skill_foundry/skill_foundry_phase0/validate_phase0_contracts.py`
 - [x] Automated tests exist:
-  - `unitree_sdk2_python/skill_foundry_phase0/tests/test_contract_validator.py`
+  - `packages/skill_foundry/skill_foundry_phase0/tests/test_contract_validator.py`
 
 ## Verification commands
 
 ```bash
-python3 -m unittest unitree_sdk2_python/skill_foundry_phase0/tests/test_contract_validator.py
-PYTHONPATH=unitree_sdk2_python python3 unitree_sdk2_python/skill_foundry_phase0/validate_phase0_contracts.py --bundle-dir docs/skill_foundry/golden/v1
+export PYTHONPATH="/path/to/AUROSY_creators_factory_platform/packages/skill_foundry:/path/to/AUROSY_creators_factory_platform/unitree_sdk2_python"
+python3 -m unittest skill_foundry_phase0.tests.test_contract_validator
+python3 packages/skill_foundry/skill_foundry_phase0/validate_phase0_contracts.py --bundle-dir docs/skill_foundry/golden/v1
 ```
 
 Both commands must pass before Phase 1 work starts.

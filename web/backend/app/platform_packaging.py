@@ -7,10 +7,12 @@ from pathlib import Path
 from typing import Any
 
 from app.services.pipeline import python_m_cmd, run_subprocess
+from app.services.sdk_path import combined_pythonpath
 
 
 async def run_package_pack(
     sdk_root: Path,
+    skill_foundry_root: Path,
     *,
     train_config: Path,
     reference_trajectory: Path,
@@ -46,6 +48,6 @@ async def run_package_pack(
                 str(output_archive.resolve()),
             ]
         )
-    env = {"PYTHONPATH": str(sdk_root)}
+    env = {"PYTHONPATH": combined_pythonpath(skill_foundry_root, sdk_root)}
     code, out, err = await run_subprocess(cmd, env=env)
     return {"exit_code": code, "stdout": out, "stderr": err}

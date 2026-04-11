@@ -1,0 +1,8 @@
+# Product validation thresholds (Phase 6.1). Tune with product; placeholders for CI/dev.
+schema_version: "1.0.0"
+profile: default
+n_episodes: 10
+# Mean of per-step mse_tracking (rad^2), averaged over all steps in all evaluation episodes.
+max_mean_mse: 0.15
+# Maximum number of episodes that end in a fall (base height termination).
+max_fall_episodes: 2

@@ -77,7 +77,7 @@ flowchart LR
 
 **Выходы:** визуальный прогон в симуляторе и/или детерминированный лог `.npz` (headless) для проверки воспроизводимости.
 
-**Спецификация и CLI:** [06_phase2_sim_playback.md](../archive/06_phase2_sim_playback.md); код: `unitree_sdk2_python/skill_foundry_sim/`, команда `skill-foundry-playback`.
+**Спецификация и CLI:** [06_phase2_sim_playback.md](../archive/06_phase2_sim_playback.md); код: `packages/skill_foundry/skill_foundry_sim/`, команда `skill-foundry-playback`.
 
 ---
 
@@ -89,7 +89,7 @@ flowchart LR
 
 **Выходы:** `DemonstrationDataset` v1 (эпизоды: `obs`, `act`, опционально `ref`, `done`, метаданные seed / симулятор / commit).
 
-**Реализация:** `unitree_sdk2_python/skill_foundry_sim/` (`demonstration_dataset.py`, расширенный `PlaybackLog` с `motor_dq` и целевыми `q` по моторам); запись через CLI `skill-foundry-playback --demonstration-json …`.
+**Реализация:** `packages/skill_foundry/skill_foundry_sim/` (`demonstration_dataset.py`, расширенный `PlaybackLog` с `motor_dq` и целевыми `q` по моторам); запись через CLI `skill-foundry-playback --demonstration-json …`.
 
 **Спецификация:** [07_phase2_trajectory_recorder.md](../archive/07_phase2_trajectory_recorder.md).
 
@@ -175,7 +175,7 @@ flowchart LR
 
 ## 11. Развёртывание платформы в продакшене (VPS)
 
-**Исходный код (два репозитория):** бэкенд и SDK — **AUROSY_creators_factory_platform** (`web/backend`, `unitree_sdk2_python`, `docs/`). SPA — **AUROSY_creators_factory** (`web/frontend`): сборка даёт `dist/`, которую reverse proxy раздаёт как статику рядом с API. Пошаговый сценарий (VPS, env, proxy): [03_implementation_plan.md](03_implementation_plan.md). Запуск и OpenAPI бэкенда: [`web/README.md`](../../web/README.md).
+**Исходный код (два репозитория):** бэкенд и SDK — **AUROSY_creators_factory_platform** (`web/backend`, `unitree_sdk2_python`, `packages/skill_foundry`, `docs/`). SPA — **AUROSY_creators_factory** (`web/frontend`): сборка даёт `dist/`, которую reverse proxy раздаёт как статику рядом с API. Пошаговый сценарий (VPS, env, proxy): [03_implementation_plan.md](03_implementation_plan.md). Запуск и OpenAPI бэкенда: [`web/README.md`](../../web/README.md).
 
 **Назначение слоя:** внешний HTTPS; **единый origin** для статики и API (меньше проблем с CORS и WebSocket); процесс **FastAPI** с маршрутами `/api/*` и **WebSocket** `/ws/telemetry`; встроенный **asyncio worker** очереди Phase 5 при `G1_PLATFORM_WORKER_ENABLED`; персистентный каталог **`G1_PLATFORM_DATA_DIR`** (SQLite, workspace job’ов, пакеты).
 

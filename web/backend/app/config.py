@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     sdk_python_root: Path | None = None
     """Override: path to unitree_sdk2_python (default: <repo_root>/unitree_sdk2_python)."""
 
+    skill_foundry_python_root: Path | None = None
+    """Override: AUROSY Skill Foundry packages (default: <repo_root>/packages/skill_foundry)."""
+
     mjcf_path: Path | None = None
     """Default MJCF for skill-foundry-playback (e.g. unitree_mujoco/.../scene_29dof.xml)."""
 
@@ -86,6 +89,17 @@ class Settings(BaseSettings):
         if self.sdk_python_root is not None:
             return self.sdk_python_root.expanduser().resolve()
         return (self.repo_root / "unitree_sdk2_python").resolve()
+
+    def resolved_skill_foundry_root(self) -> Path:
+        if self.skill_foundry_python_root is not None:
+            return self.skill_foundry_python_root.expanduser().resolve()
+        return (self.repo_root / "packages" / "skill_foundry").resolve()
+
+    def combined_pythonpath(self) -> str:
+        """PYTHONPATH: Skill Foundry tree first, then Unitree Python SDK."""
+        sf = str(self.resolved_skill_foundry_root().resolve())
+        sdk = str(self.resolved_sdk_root().resolve())
+        return os.pathsep.join((sf, sdk))
 
     def resolved_mjcf(self) -> Path | None:
         if self.mjcf_path is not None:

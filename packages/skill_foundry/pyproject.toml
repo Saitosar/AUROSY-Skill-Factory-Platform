@@ -1,0 +1,90 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aurosy-skill-foundry"
+version = "0.1.0"
+description = "AUROSY Skill Foundry — CLI и библиотеки поверх Unitree SDK (репозиторий платформы)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "cyclonedds==0.10.2",
+  "numpy",
+  "opencv-python",
+  "scipy>=1.9.0",
+  "mujoco>=3.1.0",
+]
+
+[project.optional-dependencies]
+rl = [
+  "torch>=2.0",
+  "pyyaml>=6.0",
+  "gymnasium>=0.29.0",
+  "stable-baselines3>=2.3.0",
+]
+export = ["jsonschema>=4.0", "onnx>=1.16"]
+runtime = [
+  "torch>=2.0",
+  "gymnasium>=0.29.0",
+  "stable-baselines3>=2.3.0",
+  "jsonschema>=4.0",
+]
+validation = ["pin>=2.7.0"]
+
+[project.scripts]
+skill-foundry-preprocess = "skill_foundry_preprocessing.cli:main"
+skill-foundry-playback = "skill_foundry_sim.cli:main"
+skill-foundry-train = "skill_foundry_rl.cli:main"
+skill-foundry-validate = "skill_foundry_rl.validate_cli:main"
+skill-foundry-package = "skill_foundry_export.cli:main"
+skill-foundry-runtime = "skill_foundry_runtime.cli:main"
+skill-foundry-validate-motion = "skill_foundry_validation.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+  "core_control",
+  "core_control.*",
+  "mid_level_motions",
+  "mid_level_motions.*",
+  "high_level_motions",
+  "high_level_motions.*",
+  "skill_foundry_phase0",
+  "skill_foundry_phase0.*",
+  "skill_foundry_preprocessing",
+  "skill_foundry_preprocessing.*",
+  "skill_foundry_sim",
+  "skill_foundry_sim.*",
+  "skill_foundry_rl",
+  "skill_foundry_rl.*",
+  "skill_foundry_export",
+  "skill_foundry_export.*",
+  "skill_foundry_runtime",
+  "skill_foundry_runtime.*",
+  "skill_foundry_validation",
+  "skill_foundry_validation.*",
+]
+exclude = [
+  "skill_foundry_preprocessing.tests",
+  "skill_foundry_preprocessing.tests.*",
+  "skill_foundry_phase0.tests",
+  "skill_foundry_phase0.tests.*",
+  "skill_foundry_sim.tests",
+  "skill_foundry_sim.tests.*",
+  "skill_foundry_rl.tests",
+  "skill_foundry_rl.tests.*",
+  "skill_foundry_export.tests",
+  "skill_foundry_export.tests.*",
+  "skill_foundry_runtime.tests",
+  "skill_foundry_runtime.tests.*",
+  "skill_foundry_validation.tests",
+  "skill_foundry_validation.tests.*",
+]
+
+[tool.setuptools.package-data]
+skill_foundry_rl = ["validation_thresholds.default.yaml"]
+skill_foundry_validation = ["models/**/*"]

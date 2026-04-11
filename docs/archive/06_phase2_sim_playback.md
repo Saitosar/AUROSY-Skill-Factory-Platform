@@ -35,7 +35,7 @@ For motors whose indices are **not** listed in `joint_order`, **dynamic** mode k
 
 ## Implementation (headless)
 
-Package: `unitree_sdk2_python/skill_foundry_sim/`
+Package: `packages/skill_foundry/skill_foundry_sim/`
 
 - `reference_loader.load_reference_trajectory_json` — loads JSON and validates via `skill_foundry_phase0.contract_validator.validate_reference_trajectory_dict`.
 - `run_headless_playback` — MuJoCo load, interpolation, dynamic or kinematic loop, returns `PlaybackLog` (`time_s`, `motor_q`, `ctrl`).
@@ -45,7 +45,7 @@ Package: `unitree_sdk2_python/skill_foundry_sim/`
 
 ## CLI
 
-After `pip install -e .` from `unitree_sdk2_python`:
+After `pip install -e "./unitree_sdk2_python"` and `pip install -e "./packages/skill_foundry"` from the **platform repo root**:
 
 ```bash
 skill-foundry-playback path/to/reference_trajectory.json \

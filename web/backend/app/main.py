@@ -225,6 +225,7 @@ def meta() -> dict[str, Any]:
     out: dict[str, Any] = {
         "repo_root": str(s.repo_root.resolve()),
         "sdk_python_root": str(s.resolved_sdk_root()),
+        "skill_foundry_python_root": str(s.resolved_skill_foundry_root()),
         "mjcf_default": str(s.resolved_mjcf()) if s.resolved_mjcf() else None,
         "telemetry_mode": "dds" if s.use_dds_telemetry else "mock",
         "platform_worker_enabled": bool(s.platform_worker_enabled),
@@ -270,20 +271,25 @@ def detect_cli() -> dict[str, Any]:
 @app.post("/api/validate")
 def validate(req: ValidateRequest) -> dict[str, Any]:
     s = get_settings()
-    return validate_payload(req.kind, req.payload, s.resolved_sdk_root())
+    return validate_payload(
+        req.kind,
+        req.payload,
+        s.resolved_sdk_root(),
+        s.resolved_skill_foundry_root(),
+    )
 
 
 @app.get("/api/mid-level/actions")
 def mid_level_actions() -> dict[str, Any]:
     s = get_settings()
-    actions = discover_actions(s.resolved_sdk_root())
+    actions = discover_actions(s.resolved_skill_foundry_root())
     return {"actions": discovered_to_json(actions)}
 
 
 @app.post("/api/scenario/estimate")
 def scenario_estimate(req: ScenarioEstimateRequest) -> dict[str, Any]:
     s = get_settings()
-    discovered = discover_actions(s.resolved_sdk_root())
+    discovered = discover_actions(s.resolved_skill_foundry_root())
     actions = {f"{a.subdir}/{a.action_name}": a.keyframe_count for a in discovered}
     nodes: list[dict[str, Any]] = []
     total = 0.0
@@ -319,6 +325,7 @@ async def pipeline_preprocess(req: PreprocessRequest) -> dict[str, Any]:
         mjcf = str(m) if m is not None else None
     return await run_preprocess(
         s.resolved_sdk_root(),
+        s.resolved_skill_foundry_root(),
         req.keyframes,
         req.frequency_hz,
         validate_motion=req.validate_motion,
@@ -338,7 +345,13 @@ def pipeline_validate_motion(req: ValidateMotionRequest) -> dict[str, Any]:
     else:
         m = s.resolved_mjcf()
         mjcf = str(m) if m is not None else None
-    report = run_motion_validation(s.resolved_sdk_root(), req.reference_trajectory, mjcf, validate_motion=True)
+    report = run_motion_validation(
+        s.resolved_sdk_root(),
+        s.resolved_skill_foundry_root(),
+        req.reference_trajectory,
+        mjcf,
+        validate_motion=True,
+    )
     if report is None:
         return {"ok": False, "issues": [], "notes": ["motion validation skipped"]}
     return report
@@ -348,6 +361,7 @@ def pipeline_validate_motion(req: ValidateMotionRequest) -> dict[str, Any]:
 async def pipeline_playback(req: PlaybackRequest) -> dict[str, Any]:
     s = get_settings()
     sdk = s.resolved_sdk_root()
+    sf = s.resolved_skill_foundry_root()
     mjcf = None
     if req.mjcf_path:
         mjcf = Path(req.mjcf_path)
@@ -391,6 +405,7 @@ async def pipeline_playback(req: PlaybackRequest) -> dict[str, Any]:
     try:
         result = await run_playback(
             sdk,
+            sf,
             ref_path,
             mjcf,
             mode=req.mode,
@@ -415,6 +430,7 @@ async def pipeline_playback(req: PlaybackRequest) -> dict[str, Any]:
 async def pipeline_train(req: TrainRequest) -> dict[str, Any]:
     s = get_settings()
     sdk = s.resolved_sdk_root()
+    sf = s.resolved_skill_foundry_root()
     ref = Path(req.reference_path).resolve()
     if not ref.is_file():
         return {"exit_code": 2, "stdout": "", "stderr": f"reference not found: {ref}"}
@@ -437,7 +453,7 @@ async def pipeline_train(req: TrainRequest) -> dict[str, Any]:
             return {"exit_code": 2, "stdout": "", "stderr": f"demonstration not found: {demo}"}
 
     try:
-        return await run_train(sdk, cfg_path, ref, demo, mode=req.mode)
+        return await run_train(sdk, sf, cfg_path, ref, demo, mode=req.mode)
     finally:
         if req.config is not None and cfg_path.is_file() and str(cfg_path).startswith(tempfile.gettempdir()):
             try:
@@ -560,8 +576,10 @@ async def packages_from_job(
         raise HTTPException(status_code=409, detail="missing train_out or config/reference in workspace")
     tmp_out = workspace / f"pack_{job_id}.tar.gz"
     sdk = s.resolved_sdk_root()
+    sf = s.resolved_skill_foundry_root()
     result = await run_package_pack(
         sdk,
+        sf,
         train_config=cfg,
         reference_trajectory=ref,
         run_dir=train_out,

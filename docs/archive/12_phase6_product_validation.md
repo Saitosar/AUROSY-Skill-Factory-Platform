@@ -36,7 +36,7 @@ Seeds: episode *i* uses `reset(seed=val_seed + i)` with **`val_seed`** from `pro
 
 Default bundled file:
 
-- `unitree_sdk2_python/skill_foundry_rl/validation_thresholds.default.yaml`
+- `packages/skill_foundry/skill_foundry_rl/validation_thresholds.default.yaml`
 
 Fields:
 
@@ -111,10 +111,10 @@ Separate threshold **profiles** (e.g. dance vs. arm wave) selected by manifest m
 
 ## Related code
 
-- `unitree_sdk2_python/skill_foundry_rl/product_validation.py` — metrics, thresholds, report builder
-- `unitree_sdk2_python/skill_foundry_rl/validate_cli.py` — `skill-foundry-validate`
-- `unitree_sdk2_python/skill_foundry_rl/ppo_train.py` — post-train validation hook
-- `unitree_sdk2_python/skill_foundry_export/packaging.py` — bundle + manifest `product_validation`
+- `packages/skill_foundry/skill_foundry_rl/product_validation.py` — metrics, thresholds, report builder
+- `packages/skill_foundry/skill_foundry_rl/validate_cli.py` — `skill-foundry-validate`
+- `packages/skill_foundry/skill_foundry_rl/ppo_train.py` — post-train validation hook
+- `packages/skill_foundry/skill_foundry_export/packaging.py` — bundle + manifest `product_validation`
 - `web/backend/app/platform_packages.py`, `platform_db.py`, `main.py` — DB fields and publish gate
 
 ## Definition of done (task 6.1)

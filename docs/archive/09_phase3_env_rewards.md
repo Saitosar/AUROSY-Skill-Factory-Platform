@@ -54,8 +54,9 @@ Artifacts: `train_run.json` (includes `mjcf_path`, `mjcf_sha256`, `env_snapshot`
 ## CLI
 
 ```bash
-cd unitree_sdk2_python
-pip install -e ".[rl]"
+cd /path/to/AUROSY_creators_factory_platform
+pip install -e "./unitree_sdk2_python"
+pip install -e "./packages/skill_foundry[rl]"
 skill-foundry-train \
   --mode train \
   --config /path/to/ppo_train_config.json \
@@ -74,10 +75,10 @@ The RL worker image installs Python deps including **Gymnasium** and **Stable-Ba
 
 ## Related code
 
-- `unitree_sdk2_python/skill_foundry_rl/g1_tracking_env.py` — `G1TrackingEnv`, `G1TrackingEnvConfig`
-- `unitree_sdk2_python/skill_foundry_rl/ppo_train.py` — `run_ppo_train`; optional post-train **`validation_report.json`** (Phase 6.1 — [12_phase6_product_validation.md](12_phase6_product_validation.md))
-- `unitree_sdk2_python/skill_foundry_rl/obs_schema.py` — `RL_OBS_SCHEMA_REF`, `rl_obs_dim`
-- `unitree_sdk2_python/skill_foundry_export/` — Phase 4.1 packaging (`skill-foundry-package`); spec: [10_phase4_manifest_export.md](10_phase4_manifest_export.md)
+- `packages/skill_foundry/skill_foundry_rl/g1_tracking_env.py` — `G1TrackingEnv`, `G1TrackingEnvConfig`
+- `packages/skill_foundry/skill_foundry_rl/ppo_train.py` — `run_ppo_train`; optional post-train **`validation_report.json`** (Phase 6.1 — [12_phase6_product_validation.md](12_phase6_product_validation.md))
+- `packages/skill_foundry/skill_foundry_rl/obs_schema.py` — `RL_OBS_SCHEMA_REF`, `rl_obs_dim`
+- `packages/skill_foundry/skill_foundry_export/` — Phase 4.1 packaging (`skill-foundry-package`); spec: [10_phase4_manifest_export.md](10_phase4_manifest_export.md)
 
 ## Related documents
 

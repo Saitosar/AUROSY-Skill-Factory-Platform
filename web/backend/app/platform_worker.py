@@ -42,6 +42,7 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
     root = settings.resolved_platform_data_dir()
     workspace = root / row["workspace_relpath"]
     sdk = settings.resolved_sdk_root()
+    sf = settings.resolved_skill_foundry_root()
     cfg_path = workspace / "train_config.json"
     ref_path = workspace / "reference_trajectory.json"
     demo_path = workspace / "demonstration_dataset.json"
@@ -65,6 +66,7 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
         result = await asyncio.wait_for(
             run_train(
                 sdk,
+                sf,
                 cfg_path,
                 ref_path,
                 demo_path if demo_path.is_file() else None,

@@ -11,6 +11,7 @@ from app.services.sdk_path import ensure_sdk_on_path
 
 def run_motion_validation(
     sdk_root: Path,
+    skill_foundry_root: Path,
     reference_trajectory: dict[str, Any],
     mjcf_path: str | None,
     *,
@@ -24,7 +25,7 @@ def run_motion_validation(
     if not validate_motion:
         return None
 
-    ensure_sdk_on_path(sdk_root)
+    ensure_sdk_on_path(sdk_root, skill_foundry_root)
     if "skill_foundry_validation" not in sys.modules:
         import importlib
 

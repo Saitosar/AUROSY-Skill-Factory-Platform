@@ -32,7 +32,7 @@ flowchart LR
 
 ## Hardware and simulation safety (task 6.2.2)
 
-Implementation: `unitree_sdk2_python/skill_foundry_runtime/safety.py`, `g1_joint_limits.py`, `loop_mujoco.py`, `dds_g1.py`.
+Implementation: `packages/skill_foundry/skill_foundry_runtime/safety.py`, `g1_joint_limits.py`, `loop_mujoco.py`, `dds_g1.py`.
 
 | Mechanism | MuJoCo | DDS (hardware) |
 |-----------|--------|----------------|

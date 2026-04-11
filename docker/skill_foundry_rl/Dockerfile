@@ -1,6 +1,6 @@
 # Skill Foundry RL worker — Phase 3.1
 # Stack: PyTorch + CUDA (base image), Python from base, MuJoCo via unitree_sdk2py[rl].
-# Reproducibility: pin this tag when upgrading; record in docs/skill_foundry/08_phase3_rl_worker_docker.md
+# Reproducibility: pin this tag when upgrading; record in docs/archive/08_phase3_rl_worker_docker.md
 #
 # Build from repository root:
 #   docker build -f docker/skill_foundry_rl/Dockerfile -t skill-foundry-rl:3.1 .
@@ -11,7 +11,7 @@
 FROM pytorch/pytorch:2.4.1-cuda12.1-cudnn9-runtime
 
 LABEL org.opencontainers.image.title="Skill Foundry RL worker"
-LABEL org.opencontainers.image.description="Skill Foundry RL worker: smoke (3.1) and PPO train (3.2); see docs/skill_foundry/08_phase3_rl_worker_docker.md and 09_phase3_env_rewards.md"
+LABEL org.opencontainers.image.description="Skill Foundry RL worker: smoke (3.1) and PPO train (3.2); see docs/archive/08_phase3_rl_worker_docker.md and 09_phase3_env_rewards.md"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     MUJOCO_GL=egl \
@@ -39,8 +39,10 @@ RUN git clone --depth 1 --branch 0.10.2 https://github.com/eclipse-cyclonedds/cy
 WORKDIR /opt/skill_foundry
 
 COPY unitree_sdk2_python /opt/skill_foundry/unitree_sdk2_python
+COPY packages/skill_foundry /opt/skill_foundry/packages/skill_foundry
 
-RUN pip install --no-cache-dir -e "/opt/skill_foundry/unitree_sdk2_python[rl]"
+RUN pip install --no-cache-dir -e "/opt/skill_foundry/unitree_sdk2_python[rl]" \
+    && pip install --no-cache-dir -e "/opt/skill_foundry/packages/skill_foundry[rl]"
 
 ENTRYPOINT ["skill-foundry-train"]
 CMD ["--help"]

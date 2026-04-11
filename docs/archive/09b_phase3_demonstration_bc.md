@@ -12,7 +12,7 @@ This document specifies task **3.3** from [03_implementation_plan.md](03_impleme
 
 Demonstrations use `obs_schema_ref` = `skill_foundry_sim_motor_q_dq_ctrl_v1` (58-D: `motor_q`, `motor_dq`). The RL policy expects `skill_foundry_rl_tracking_v1` (87-D without IMU). The module `skill_foundry_rl.demo_rl_align` maps each demo step to RL observations by interpolating the reference at the correct simulation time and forming the tracking-error block (same semantics as `G1TrackingEnv`).
 
-**Time index:** a demo step `k` (0-based) corresponds to simulation time \((k+1)/\text{sampling\_hz}\) after the corresponding `mj_step` in playback (see [headless_playback.py](../../unitree_sdk2_python/skill_foundry_sim/headless_playback.py)).
+**Time index:** a demo step `k` (0-based) corresponds to simulation time \((k+1)/\text{sampling\_hz}\) after the corresponding `mj_step` in playback (see [headless_playback.py](../../packages/skill_foundry/skill_foundry_sim/headless_playback.py)).
 
 **IMU:** BC pretrain is supported only when `env.include_imu_in_obs` is **false** (demonstrations do not contain an IMU block).
 
@@ -39,8 +39,9 @@ CLI: `skill-foundry-train --mode train ... --demonstration-dataset PATH` **overr
 ## CLI example
 
 ```bash
-cd unitree_sdk2_python
-pip install -e ".[rl]"
+cd /path/to/AUROSY_creators_factory_platform
+pip install -e "./unitree_sdk2_python"
+pip install -e "./packages/skill_foundry[rl]"
 skill-foundry-train \
   --mode train \
   --config /path/to/ppo_train_config.json \
@@ -69,9 +70,9 @@ An auxiliary BC term inside PPO updates is **not** part of this MVP. Add it only
 
 ## Related code
 
-- [demo_rl_align.py](../../unitree_sdk2_python/skill_foundry_rl/demo_rl_align.py) — alignment and dataset stacking.
-- [bc_pretrain.py](../../unitree_sdk2_python/skill_foundry_rl/bc_pretrain.py) — MSE on policy mean.
-- [ppo_train.py](../../unitree_sdk2_python/skill_foundry_rl/ppo_train.py) — `run_ppo_train(..., demonstration_path=...)`.
+- [demo_rl_align.py](../../packages/skill_foundry/skill_foundry_rl/demo_rl_align.py) — alignment and dataset stacking.
+- [bc_pretrain.py](../../packages/skill_foundry/skill_foundry_rl/bc_pretrain.py) — MSE on policy mean.
+- [ppo_train.py](../../packages/skill_foundry/skill_foundry_rl/ppo_train.py) — `run_ppo_train(..., demonstration_path=...)`.
 
 ## Related documents
 

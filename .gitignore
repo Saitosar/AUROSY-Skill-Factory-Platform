@@ -1,0 +1,4 @@
+.DS_Store
+**/.DS_Store
+**/MUJOCO_LOG.TXT
+platform/lib/cyclonedds/**/*.dylib

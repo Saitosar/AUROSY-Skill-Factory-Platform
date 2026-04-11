@@ -35,9 +35,9 @@ def _count_keyframes(pose_path: str) -> int:
     return 1
 
 
-def discover_actions(sdk_root: Path) -> list[DiscoveredAction]:
+def discover_actions(skill_foundry_root: Path) -> list[DiscoveredAction]:
     out: list[DiscoveredAction] = []
-    mid = sdk_root / "mid_level_motions"
+    mid = skill_foundry_root / "mid_level_motions"
     for sub in ("basic_actions", "complex_actions"):
         base = mid / sub
         if not base.is_dir():

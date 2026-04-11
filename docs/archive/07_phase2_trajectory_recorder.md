@@ -30,7 +30,7 @@ Validation API: `skill_foundry_phase0.contract_validator.validate_demonstration_
 
 ## Implementation
 
-- Package: `unitree_sdk2_python/skill_foundry_sim/`
+- Package: `packages/skill_foundry/skill_foundry_sim/`
 - `headless_playback.PlaybackLog` includes `motor_q`, `motor_dq`, `reference_motor_q`, and `ctrl` for each simulation step.
 - `demonstration_dataset.build_demonstration_dataset` assembles the JSON object; `write_demonstration_dataset_json` writes the file.
 

@@ -11,6 +11,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from app.services.sdk_path import combined_pythonpath
+
 _MAX_NPZ_B64_BYTES = 8 * 1024 * 1024
 
 
@@ -48,6 +50,7 @@ def python_m_cmd(module: str) -> list[str]:
 
 async def run_preprocess(
     sdk_root: Path,
+    skill_foundry_root: Path,
     keyframes_json: dict[str, Any],
     frequency_hz: float | None = None,
     *,
@@ -72,7 +75,7 @@ async def run_preprocess(
         if frequency_hz is not None:
             cmd.extend(["--frequency-hz", str(frequency_hz)])
 
-        env = {"PYTHONPATH": str(sdk_root)}
+        env = {"PYTHONPATH": combined_pythonpath(skill_foundry_root, sdk_root)}
         code, out, err = await run_subprocess(cmd, cwd=root, env=env)
 
         ref_text = ""
@@ -100,6 +103,7 @@ async def run_preprocess(
                 ref_obj = _json.loads(ref_text)
                 out_payload["motion_validation"] = run_motion_validation(
                     sdk_root,
+                    skill_foundry_root,
                     ref_obj,
                     mjcf_path,
                     validate_motion=True,
@@ -115,6 +119,7 @@ async def run_preprocess(
 
 async def run_playback(
     sdk_root: Path,
+    skill_foundry_root: Path,
     reference_path: Path,
     mjcf_path: Path,
     *,
@@ -176,7 +181,7 @@ async def run_playback(
         if demonstration_json and demo_path is not None:
             cmd.extend(["--demonstration-json", str(demo_path)])
 
-        env = {"PYTHONPATH": str(sdk_root)}
+        env = {"PYTHONPATH": combined_pythonpath(skill_foundry_root, sdk_root)}
         code, out, err = await run_subprocess(cmd, env=env)
 
         demo_text = None
@@ -207,6 +212,7 @@ async def run_playback(
 
 async def run_train(
     sdk_root: Path,
+    skill_foundry_root: Path,
     config_path: Path,
     reference_path: Path,
     demonstration_path: Path | None = None,
@@ -239,6 +245,6 @@ async def run_train(
     if demonstration_path is not None:
         cmd.extend(["--demonstration-dataset", str(demonstration_path.resolve())])
 
-    env = {"PYTHONPATH": str(sdk_root)}
+    env = {"PYTHONPATH": combined_pythonpath(skill_foundry_root, sdk_root)}
     code, out, err = await run_subprocess(cmd, env=env)
     return {"exit_code": code, "stdout": out, "stderr": err}

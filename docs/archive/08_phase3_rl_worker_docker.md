@@ -10,15 +10,15 @@ Matches [02_architecture.md](02_architecture.md) §6: **Training orchestrator �
 
 | Mode | CLI | Needs MJCF | Behavior |
 |------|-----|------------|----------|
-| **smoke** (default) | `--mode smoke` or omit | No | Validates JSON + tiny CPU torch loop ([smoke_train.py](../../unitree_sdk2_python/skill_foundry_rl/smoke_train.py)) |
-| **train** | `--mode train` | **Yes** — set `env.mjcf_path` in config to mounted `scene_29dof.xml` | PPO on `G1TrackingEnv` ([ppo_train.py](../../unitree_sdk2_python/skill_foundry_rl/ppo_train.py)) |
+| **smoke** (default) | `--mode smoke` or omit | No | Validates JSON + tiny CPU torch loop ([smoke_train.py](../../packages/skill_foundry/skill_foundry_rl/smoke_train.py)) |
+| **train** | `--mode train` | **Yes** — set `env.mjcf_path` in config to mounted `scene_29dof.xml` | PPO on `G1TrackingEnv` ([ppo_train.py](../../packages/skill_foundry/skill_foundry_rl/ppo_train.py)) |
 
 Use [golden/v1/ppo_train_config.example.json](golden/v1/ppo_train_config.example.json) as a template for Phase 3.2. Mount `unitree_mujoco/` read-only if the image does not embed those assets.
 
 ## Image contents
 
 - **Base:** `pytorch/pytorch:2.4.1-cuda12.1-cudnn9-runtime` (see comments in [docker/skill_foundry_rl/Dockerfile](../../docker/skill_foundry_rl/Dockerfile); pin updated when upgrading).
-- **Python packages:** `pip install -e "/opt/skill_foundry/unitree_sdk2_python[rl]"` — brings `torch`, `pyyaml`, `mujoco`, `gymnasium`, `stable-baselines3`, and Skill Foundry modules (`skill_foundry_phase0`, `skill_foundry_sim`, `skill_foundry_rl`).
+- **Python packages:** `pip install -e "/opt/skill_foundry/unitree_sdk2_python[rl]"` then `pip install -e "/opt/skill_foundry/packages/skill_foundry[rl]"` — upstream `unitree_sdk2py` plus AUROSY modules (`skill_foundry_phase0`, `skill_foundry_sim`, `skill_foundry_rl`, …).
 - **Environment:** `MUJOCO_GL=egl` for headless-friendly OpenGL where applicable.
 
 ## Host requirements
@@ -28,7 +28,7 @@ Use [golden/v1/ppo_train_config.example.json](golden/v1/ppo_train_config.example
 
 ## Build
 
-From the **repository root** (context must include `unitree_sdk2_python/`):
+From the **repository root** (context must include `unitree_sdk2_python/` and `packages/skill_foundry/`):
 
 ```bash
 docker build -f docker/skill_foundry_rl/Dockerfile -t skill-foundry-rl:3.1 .
@@ -38,7 +38,7 @@ A [`.dockerignore`](../../.dockerignore) at the repo root excludes heavy paths n
 
 ## Entrypoint / CLI
 
-Container `ENTRYPOINT` is `skill-foundry-train` (see `unitree_sdk2_python/skill_foundry_rl/cli.py`).
+Container `ENTRYPOINT` is `skill-foundry-train` (see `packages/skill_foundry/skill_foundry_rl/cli.py`).
 
 | Argument | Required | Description |
 |----------|----------|-------------|
@@ -48,7 +48,7 @@ Container `ENTRYPOINT` is `skill-foundry-train` (see `unitree_sdk2_python/skill_
 
 `output_dir` in the config may be relative to the config file’s directory (same rule as the local CLI).
 
-**Local install (without Docker):** `pip install -e ".[rl]"` from `unitree_sdk2_python/`, then `python -m skill_foundry_rl` with the same arguments.
+**Local install (without Docker):** from the repo root, `pip install -e "./unitree_sdk2_python"` then `pip install -e "./packages/skill_foundry[rl]"`, then `python -m skill_foundry_rl` with the same arguments.
 
 ## Run (example with golden data)
 
@@ -104,7 +104,7 @@ docker run --rm --gpus all \
 ## Related code
 
 - Image: [docker/skill_foundry_rl/Dockerfile](../../docker/skill_foundry_rl/Dockerfile), [docker/skill_foundry_rl/README.md](../../docker/skill_foundry_rl/README.md).
-- Python: `unitree_sdk2_python/skill_foundry_rl/`.
+- Python: `packages/skill_foundry/skill_foundry_rl/`.
 
 ## Related documents
 

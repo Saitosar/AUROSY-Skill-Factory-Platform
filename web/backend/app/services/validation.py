@@ -18,8 +18,13 @@ Kind = Literal[
 ]
 
 
-def validate_payload(kind: Kind, payload: dict[str, Any], sdk_root: Path) -> dict[str, Any]:
-    ensure_sdk_on_path(sdk_root)
+def validate_payload(
+    kind: Kind,
+    payload: dict[str, Any],
+    sdk_root: Path,
+    skill_foundry_root: Path,
+) -> dict[str, Any]:
+    ensure_sdk_on_path(sdk_root, skill_foundry_root)
     if "skill_foundry_phase0" not in sys.modules:
         import importlib
 
