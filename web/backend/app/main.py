@@ -62,6 +62,7 @@ from app.services.pipeline import (
 from app.services.dds_joint_bridge import DdsJointBridge, maybe_start_dds_joint_bridge
 from app.services.telemetry import mock_telemetry_stream
 from app.services.validation import validate_payload
+from app.services.cortex_api import router as cortex_router
 
 
 @asynccontextmanager
@@ -110,6 +111,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(cortex_router)
 
 
 class ValidateRequest(BaseModel):

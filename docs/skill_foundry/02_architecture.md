@@ -9,13 +9,16 @@ flowchart LR
   user[AuthoringUI] --> store[ArtifactStore]
   store --> pre[Preprocessor]
   pre --> ref[ReferenceTrajectory]
-  ref --> queue[TrainingOrchestrator]
+  ref --> cortex[CortexPipeline]
+  cortex --> queue[TrainingOrchestrator]
   queue --> worker[RLWorker]
   worker --> val[Validation]
   val --> pack[ExportPackage]
   pack --> dist[Distribution]
   dist --> runtime[RobotRuntime]
 ```
+
+**Cortex Pipeline** — слой автоматической коррекции и безопасного обучения (подробнее: [04_cortex_pipeline.md](04_cortex_pipeline.md)).
 
 **Опциональный путь обогащения датасета** (логирование симуляции при проигрывании motion):
 
@@ -52,6 +55,33 @@ flowchart LR
 **Выходы:** стабильные URI/идентификаторы артефактов для препроцессора и симуляции.
 
 **Примечания:** желательна неизменяемость версий после публикации обучения (immutable snapshot для воспроизводимости).
+
+---
+
+## 2a. Cortex Pipeline (NMR + Enhanced RL)
+
+**Назначение:** автоматическая коррекция пользовательских анимаций и обучение с учетом физических ограничений и безопасности.
+
+**Компоненты:**
+
+1. **NMR Translator** (`skill_foundry_nmr`):
+   - **IK Corrector** (Pinocchio): коррекция joint limits, адаптация под кинематику G1
+   - **Collision Fixer** (MuJoCo): детекция и устранение self-collisions
+
+2. **Enhanced RL** (`skill_foundry_rl`):
+   - `G1TrackingEnv` с collision penalty и termination
+   - DeepMimic-style tracking reward
+
+3. **Protocol Generator** (`skill_foundry_export`):
+   - `record_result.py`: rollout политики → JSON для UI
+
+**Входы:** ReferenceTrajectory из Preprocessor; MJCF/URDF для физики.
+
+**Выходы:** скорректированная траектория; обученная политика; результат rollout для UI.
+
+**API:** `/api/cortex/correct`, `/api/cortex/train`, `/api/cortex/result/{job_id}`.
+
+**Документация:** [04_cortex_pipeline.md](04_cortex_pipeline.md), [05_cortex_api_reference.md](05_cortex_api_reference.md).
 
 ---
 
@@ -208,7 +238,9 @@ flowchart LR
 |----|---|----------|
 | Authoring | Artifact store | keyframes, motion, scenario JSON |
 | Artifact store | Preprocessor | снимок версии артефакта |
-| Preprocessor | Training / Sim | ReferenceTrajectory v1 |
+| Preprocessor | Cortex / Training | ReferenceTrajectory v1 |
+| Cortex NMR | Cortex RL | скорректированная траектория |
+| Cortex RL | Export | обученная политика + rollout JSON |
 | Sim playback | TrajectoryRecorder | DemonstrationDataset |
 | Orchestrator | RL worker | job config + пути к данным |
 | RL worker | Validation | метрики + чекпоинты |
@@ -222,6 +254,9 @@ flowchart LR
 
 - Видение: [01_vision_and_approach.md](01_vision_and_approach.md).
 - План внедрения (фазы и **продакшен на VPS**): [03_implementation_plan.md](03_implementation_plan.md).
+- **Cortex Pipeline (NMR + RL)**: [04_cortex_pipeline.md](04_cortex_pipeline.md).
+- **Cortex API Reference**: [05_cortex_api_reference.md](05_cortex_api_reference.md).
+- **Vast.ai GPU Training**: [../deployment/vast-ai-training.md](../deployment/vast-ai-training.md).
 - Бэкенд и OpenAPI: [`web/README.md`](../../web/README.md).
 - Контракты Phase 0: [04_phase0_contracts.md](../archive/04_phase0_contracts.md).
 - Проигрывание в симе (фаза 2): [06_phase2_sim_playback.md](../archive/06_phase2_sim_playback.md).

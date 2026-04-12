@@ -31,6 +31,16 @@ runtime = [
   "jsonschema>=4.0",
 ]
 validation = ["pin>=2.7.0"]
+nmr = [
+  "pin>=2.7.0",
+]
+cortex = [
+  "torch>=2.0",
+  "pyyaml>=6.0",
+  "gymnasium>=0.29.0",
+  "stable-baselines3>=2.3.0",
+  "pin>=2.7.0",
+]
 
 [project.scripts]
 skill-foundry-preprocess = "skill_foundry_preprocessing.cli:main"
@@ -40,6 +50,7 @@ skill-foundry-validate = "skill_foundry_rl.validate_cli:main"
 skill-foundry-package = "skill_foundry_export.cli:main"
 skill-foundry-runtime = "skill_foundry_runtime.cli:main"
 skill-foundry-validate-motion = "skill_foundry_validation.cli:main"
+skill-foundry-nmr = "skill_foundry_nmr.cli:main"
 
 [tool.setuptools]
 include-package-data = true
@@ -67,6 +78,8 @@ include = [
   "skill_foundry_runtime.*",
   "skill_foundry_validation",
   "skill_foundry_validation.*",
+  "skill_foundry_nmr",
+  "skill_foundry_nmr.*",
 ]
 exclude = [
   "skill_foundry_preprocessing.tests",
@@ -83,6 +96,8 @@ exclude = [
   "skill_foundry_runtime.tests.*",
   "skill_foundry_validation.tests",
   "skill_foundry_validation.tests.*",
+  "skill_foundry_nmr.tests",
+  "skill_foundry_nmr.tests.*",
 ]
 
 [tool.setuptools.package-data]
