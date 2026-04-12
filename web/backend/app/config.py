@@ -71,12 +71,19 @@ class Settings(BaseSettings):
     skip_validation_gate: bool = False
     """If True, allow publishing packages without product validation (dev only). G1_SKIP_VALIDATION_GATE."""
 
+    cors_origins: str = "https://aurosy-skill-factory-application.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+    """Comma-separated list of allowed CORS origins. G1_CORS_ORIGINS."""
+
     @field_validator("skip_validation_gate", mode="before")
     @classmethod
     def _parse_skip_validation_gate(cls, v: object) -> bool:
         if isinstance(v, str):
             return v.strip().lower() in ("1", "true", "yes", "on")
         return bool(v)
+
+    def cors_origins_list(self) -> list[str]:
+        """Parse comma-separated CORS origins into a list."""
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @field_validator("platform_worker_enabled", mode="before")
     @classmethod
