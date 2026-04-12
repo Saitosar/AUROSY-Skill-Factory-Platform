@@ -36,7 +36,13 @@ class G1TrackingEnvConfig:
     """If set, truncate after this many steps regardless of trajectory length."""
     include_imu_in_obs: bool = False
     reward_weights: dict[str, float] | None = None
-    """Keys: w_track, w_alive, w_energy, w_jerk (defaults applied if missing)."""
+    """Keys: w_track, w_alive, w_energy, w_jerk, w_collision (defaults applied if missing)."""
+    enable_collision_check: bool = True
+    """Enable self-collision detection and penalty."""
+    terminate_on_collision: bool = False
+    """If True, terminate episode on self-collision (stricter training)."""
+    floor_geom_substrings: tuple[str, ...] = ("floor", "ground", "plane")
+    """Geom name substrings to exclude from self-collision detection."""
 
 
 def _default_reward_weights() -> dict[str, float]:
@@ -45,6 +51,7 @@ def _default_reward_weights() -> dict[str, float]:
         "w_alive": 0.02,
         "w_energy": 1.0e-5,
         "w_jerk": 1.0e-6,
+        "w_collision": 10.0,
     }
 
 
@@ -66,6 +73,8 @@ def g1_env_cfg_from_train_config(config: dict[str, Any]) -> G1TrackingEnvConfig:
         max_episode_steps=env_cfg_dict.get("max_episode_steps"),
         include_imu_in_obs=bool(env_cfg_dict.get("include_imu_in_obs", False)),
         reward_weights=env_cfg_dict.get("reward_weights"),
+        enable_collision_check=bool(env_cfg_dict.get("enable_collision_check", True)),
+        terminate_on_collision=bool(env_cfg_dict.get("terminate_on_collision", False)),
     )
 
 
@@ -179,6 +188,33 @@ class G1TrackingEnv(gym.Env):
         """Pelvis free joint world z (qpos[2])."""
         return float(self._data.qpos[2])
 
+    def _check_self_collision(self) -> tuple[bool, int]:
+        """Check for self-collisions (excluding floor contacts).
+        
+        Returns:
+            Tuple of (has_collision, collision_count)
+        """
+        if not self._cfg.enable_collision_check:
+            return False, 0
+        
+        collision_count = 0
+        for ci in range(self._data.ncon):
+            con = self._data.contact[ci]
+            if float(con.dist) >= 0.0:
+                continue
+            g1 = mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_GEOM, con.geom1)
+            g2 = mujoco.mj_id2name(self._model, mujoco.mjtObj.mjOBJ_GEOM, con.geom2)
+            if g1 is None or g2 is None:
+                continue
+            floor_hit = any(s in g1.lower() for s in self._cfg.floor_geom_substrings) or any(
+                s in g2.lower() for s in self._cfg.floor_geom_substrings
+            )
+            if floor_hit:
+                continue
+            collision_count += 1
+        
+        return collision_count > 0, collision_count
+
     def _get_obs(self) -> np.ndarray:
         q = self._data.sensordata[: self.nu].copy()
         dq = self._data.sensordata[self.nu : 2 * self.nu].copy()
@@ -231,9 +267,13 @@ class G1TrackingEnv(gym.Env):
         r_jerk = -self._reward_weights["w_jerk"] * jerk
         self._prev_ctrl = ctrl.copy()
 
-        reward = r_track + r_alive + r_energy + r_jerk
+        has_collision, collision_count = self._check_self_collision()
+        r_collision = -self._reward_weights["w_collision"] * collision_count if has_collision else 0.0
 
-        terminated = bool(fallen)
+        reward = r_track + r_alive + r_energy + r_jerk + r_collision
+
+        collision_terminated = has_collision and self._cfg.terminate_on_collision
+        terminated = bool(fallen or collision_terminated)
         past_reference = t_next > self._t_max + 1e-9
         steps_exceeded = self._max_episode_steps is not None and self._step_idx >= self._max_episode_steps
         truncated = bool(past_reference or steps_exceeded)
@@ -243,9 +283,12 @@ class G1TrackingEnv(gym.Env):
             "r_alive": r_alive,
             "r_energy": r_energy,
             "r_jerk": r_jerk,
+            "r_collision": r_collision,
             "mse_tracking": mse_track,
             "base_height": height,
             "fallen": fallen,
+            "has_collision": has_collision,
+            "collision_count": collision_count,
         }
         obs = self._get_obs()
         return obs, reward, terminated, truncated, info
