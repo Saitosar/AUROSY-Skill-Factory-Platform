@@ -2,3 +2,17 @@
 **/.DS_Store
 **/MUJOCO_LOG.TXT
 platform/lib/cyclonedds/**/*.dylib
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# RL training outputs (large)
+balance_policy/
+balance_v2/
+ppo_output/
+ppo_output_2m/
+ppo_output_long/
+smoke_output/
+*.onnx
