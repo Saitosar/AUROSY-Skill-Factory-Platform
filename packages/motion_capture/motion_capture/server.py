@@ -12,6 +12,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from .bvh_export import BVHExporter, RecordingSession
+from .balance_inference import load_balance_inferencer_from_env
 from .pose_backend import PoseBackend, create_pose_backend_from_env
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,17 @@ class CaptureSession:
         self.recording = RecordingSession(fps=30.0)
         self.is_recording = False
         self.exporter = BVHExporter()
+        self.retargeter = None
+        self.joint_order: list[str] = []
+        self.balance_inferencer = load_balance_inferencer_from_env()
+        try:
+            from skill_foundry_retarget import Retargeter, load_joint_map
+
+            self.retargeter = Retargeter(joint_map=load_joint_map(), clip_to_limits=True)
+            self.joint_order = list(self.retargeter.joint_order)
+        except Exception:
+            self.retargeter = None
+            self.joint_order = []
 
     def process_frame(self, frame_data: bytes) -> Optional[Dict]:
         nparr = np.frombuffer(frame_data, np.uint8)
@@ -39,12 +51,32 @@ class CaptureSession:
         if result.landmarks is None:
             return None
 
-        return {
+        joint_angles_rad: list[float] | None = None
+        balance_timing_ms = 0.0
+        if self.retargeter is not None:
+            try:
+                retarget = self.retargeter.compute(result.landmarks)
+                joints = retarget.joint_angles_rad
+                if self.balance_inferencer is not None:
+                    balanced = self.balance_inferencer.apply(joints)
+                    joints = balanced.joint_angles_rad
+                    balance_timing_ms = balanced.elapsed_ms
+                joint_angles_rad = joints.tolist()
+            except Exception:
+                joint_angles_rad = None
+
+        payload: Dict = {
             "type": "pose",
             "landmarks": result.landmarks.tolist(),
             "confidence": result.confidence,
             "timestamp_ms": result.timestamp_ms,
         }
+        if joint_angles_rad is not None:
+            payload["joint_order"] = self.joint_order
+            payload["joint_angles_rad"] = joint_angles_rad
+            if balance_timing_ms > 0:
+                payload["balance_timing_ms"] = balance_timing_ms
+        return payload
 
     def start_recording(self) -> None:
         self.recording.clear()
