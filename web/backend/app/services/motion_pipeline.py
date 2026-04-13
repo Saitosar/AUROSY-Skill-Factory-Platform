@@ -24,6 +24,11 @@ from app.platform_packages import register_pack_output
 from app.services.retargeting import parse_landmarks_payload, run_retargeting
 
 try:
+    from skill_foundry_retarget.bvh_to_trajectory import BVHToTrajectoryConverter
+except ImportError:
+    BVHToTrajectoryConverter = None  # type: ignore[assignment,misc]
+
+try:
     from skill_foundry_phase0.contract_validator import validate_reference_trajectory_dict
 except ImportError:
     validate_reference_trajectory_dict = None  # type: ignore[misc, assignment]
@@ -141,6 +146,28 @@ def _load_landmarks_array(artifact_path: Path) -> np.ndarray:
     return arr
 
 
+def _load_capture_landmarks_array(
+    artifact_path: Path,
+    *,
+    fallback_frequency_hz: float,
+) -> tuple[np.ndarray, float]:
+    suffix = artifact_path.suffix.lower()
+    if suffix != ".bvh":
+        return _load_landmarks_array(artifact_path), fallback_frequency_hz
+
+    if BVHToTrajectoryConverter is None:
+        raise MotionPipelineError("BVH converter is unavailable: install skill_foundry_retarget")
+    converter = BVHToTrajectoryConverter()
+    try:
+        motion = converter.parse(artifact_path.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        raise MotionPipelineError(f"invalid BVH artifact: {exc}") from exc
+    hz = fallback_frequency_hz
+    if motion.frame_time > 0:
+        hz = 1.0 / motion.frame_time
+    return converter.to_landmarks_approx(motion), hz
+
+
 def build_reference_trajectory_dict(
     *,
     joint_rows: list[list[float]],
@@ -243,6 +270,7 @@ async def run_motion_pipeline_action(
     action: MotionAction,
     capture_artifact: str | None = None,
     landmarks_artifact: str | None = None,
+    bvh_artifact: str | None = None,
     reference_artifact: str | None = None,
     frequency_hz: float = 50.0,
     force: bool = False,
@@ -291,10 +319,21 @@ async def run_motion_pipeline_action(
             src = _artifact_path(settings, user_id, reference_artifact)
             shutil.copy2(src, ref_out)
             ref = json.loads(ref_out.read_text(encoding="utf-8"))
-        elif landmarks_artifact:
-            src = _artifact_path(settings, user_id, landmarks_artifact)
-            state["landmarks_artifact"] = landmarks_artifact
-            arr = _load_landmarks_array(src)
+        elif landmarks_artifact or capture_artifact or bvh_artifact:
+            capture_name = landmarks_artifact or capture_artifact or bvh_artifact
+            if capture_name is None:
+                raise MotionPipelineError("capture artifact is required")
+            src = _artifact_path(settings, user_id, capture_name)
+            if landmarks_artifact:
+                state["landmarks_artifact"] = landmarks_artifact
+            if capture_artifact:
+                state["capture_artifact"] = capture_artifact
+            if bvh_artifact:
+                state["capture_artifact"] = bvh_artifact
+            arr, effective_frequency_hz = _load_capture_landmarks_array(
+                src,
+                fallback_frequency_hz=frequency_hz,
+            )
             frames, _ = parse_landmarks_payload(arr)
             result = run_retargeting(
                 sdk_root=settings.resolved_sdk_root(),
@@ -312,12 +351,12 @@ async def run_motion_pipeline_action(
             joint_rows = q.tolist()
             ref = build_reference_trajectory_dict(
                 joint_rows=joint_rows,
-                frequency_hz=frequency_hz,
+                frequency_hz=effective_frequency_hz,
             )
             ref_out.write_text(json.dumps(ref, indent=2), encoding="utf-8")
         else:
             raise MotionPipelineError(
-                "build_reference requires reference_artifact or landmarks_artifact",
+                "build_reference requires reference_artifact, landmarks_artifact, capture_artifact, or bvh_artifact",
             )
 
         _validate_reference_dict(ref)

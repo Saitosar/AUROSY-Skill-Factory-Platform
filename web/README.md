@@ -90,8 +90,8 @@ OpenAPI: `http://127.0.0.1:8000/docs`
   1. Camera frames -> `WS /ws/capture`
   2. Landmarks -> `POST /api/pipeline/retarget`
   3. Retargeted angles -> live MuJoCo preview
-  4. Опционально: после записи — `POST /api/platform/artifacts/{name}` с JSON `{ "frames": [N,33,3] }`, затем `POST /api/pipeline/motion/run` с `action: build_reference` и `landmarks_artifact` (см. §14 Phase 6).
-- Сервис `motion_capture` выбирает бэкенд по **`MOTION_CAPTURE_BACKEND`** (`mediapipe` по умолчанию; `vitpose` зарезервировано — см. `packages/motion_capture/README.md`).
+  4. Опционально: после записи — `POST /api/platform/artifacts/{name}` с capture JSON (`schema_version: "aurosy_capture_v1"`, `frames`, `bvh`), затем `POST /api/pipeline/motion/run` с `action: build_reference` и `landmarks_artifact`/`capture_artifact`/`bvh_artifact` (см. §14 Phase 6).
+- Сервис `motion_capture` выбирает бэкенд по **`MOTION_CAPTURE_BACKEND`** (`mediapipe` по умолчанию; `vitpose` пока отложен и намеренно завершается понятной ошибкой — см. `packages/motion_capture/README.md`).
 - Для настройки frontend endpoint capture-сервиса используйте `VITE_MOTION_CAPTURE_WS_URL` в UI-репозитории.
 
 ## Фронтенд (отдельный репозиторий)

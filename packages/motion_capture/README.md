@@ -15,7 +15,7 @@ motion-capture-server
 | Value | Behavior |
 |-------|----------|
 | `mediapipe` (default) | `MediaPipePoseBackend` — CPU-friendly. |
-| `vitpose` | **Not implemented** — process exits with `RuntimeError` at first WebSocket session until mmpose wiring lands. Install optional extra `pip install -e ".[vitpose]"` only when contributing that path. |
+| `vitpose` | **Deferred implementation** — startup raises an actionable `RuntimeError` from `ViTPosePoseBackend.DEFERRED_REASON` until keypoint mapping to 33 MediaPipe landmarks is implemented. Install optional extra `pip install -e ".[vitpose]"` only when contributing that path. |
 | Other | Logged warning; falls back to MediaPipe. |
 
 ## Endpoints

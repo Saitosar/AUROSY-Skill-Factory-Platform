@@ -14,7 +14,8 @@ docker run --rm -p 8001:8001 aurosy-motion-capture:0.1
 
 Optional environment (passed with `-e`):
 
-- `MOTION_CAPTURE_BACKEND=mediapipe` (default). **`vitpose`** is not implemented in the image yet and will fail at runtime if set without a custom build.
+- `MOTION_CAPTURE_BACKEND=mediapipe` (default).
+- `MOTION_CAPTURE_BACKEND=vitpose` is intentionally deferred and raises a startup error until ViTPose keypoints are mapped to 33 MediaPipe landmarks (`ViTPosePoseBackend.DEFERRED_REASON`).
 
 Frontend live-track integration expects `WS /ws/capture` to be reachable from the browser:
 

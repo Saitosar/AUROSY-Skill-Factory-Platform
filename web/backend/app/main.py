@@ -266,6 +266,7 @@ class MotionPipelineRunRequest(BaseModel):
     force: bool = False
     capture_artifact: str | None = None
     landmarks_artifact: str | None = None
+    bvh_artifact: str | None = None
     reference_artifact: str | None = None
     frequency_hz: float = Field(default=50.0, gt=0)
     train_config: dict[str, Any] = Field(default_factory=dict)
@@ -460,6 +461,7 @@ async def motion_pipeline_run(
             action=req.action,
             capture_artifact=req.capture_artifact,
             landmarks_artifact=req.landmarks_artifact,
+            bvh_artifact=req.bvh_artifact,
             reference_artifact=req.reference_artifact,
             frequency_hz=req.frequency_hz,
             force=req.force,
