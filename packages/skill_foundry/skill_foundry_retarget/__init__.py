@@ -2,11 +2,15 @@
 
 from .joint_map import G1_JOINT_ORDER, JointMap, JointMapping, load_joint_map
 from .retarget import RetargetResult, Retargeter
+from .bvh_to_trajectory import BVHConversionError, BVHToTrajectoryConverter, ParsedBvhMotion
 
 __all__ = [
+    "BVHConversionError",
+    "BVHToTrajectoryConverter",
     "G1_JOINT_ORDER",
     "JointMap",
     "JointMapping",
+    "ParsedBvhMotion",
     "RetargetResult",
     "Retargeter",
     "load_joint_map",

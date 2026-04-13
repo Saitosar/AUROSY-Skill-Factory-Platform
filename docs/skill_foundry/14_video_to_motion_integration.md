@@ -40,14 +40,14 @@
 - Create: `packages/motion_capture/pyproject.toml`
 - Create: `packages/motion_capture/README.md`
 
-- [ ] **Step 1: Create package directory structure**
+- [x] **Step 1: Create package directory structure**
 
 ```bash
 mkdir -p packages/motion_capture/motion_capture
 mkdir -p packages/motion_capture/tests
 ```
 
-- [ ] **Step 2: Create pyproject.toml**
+- [x] **Step 2: Create pyproject.toml**
 
 ```toml
 # packages/motion_capture/pyproject.toml
@@ -80,7 +80,7 @@ motion-capture-server = "motion_capture.server:main"
 where = ["."]
 ```
 
-- [ ] **Step 3: Create __init__.py**
+- [x] **Step 3: Create __init__.py**
 
 ```python
 # packages/motion_capture/motion_capture/__init__.py
@@ -89,7 +89,7 @@ where = ["."]
 __version__ = "0.1.0"
 ```
 
-- [ ] **Step 4: Commit scaffold**
+- [x] **Step 4: Commit scaffold**
 
 ```bash
 git add packages/motion_capture/
@@ -104,7 +104,7 @@ git commit -m "feat(motion-capture): scaffold package structure"
 - Create: `packages/motion_capture/motion_capture/pose_backend.py`
 - Create: `packages/motion_capture/tests/test_pose_backend.py`
 
-- [ ] **Step 1: Write failing test for pose extraction**
+- [x] **Step 1: Write failing test for pose extraction**
 
 ```python
 # packages/motion_capture/tests/test_pose_backend.py
@@ -131,7 +131,7 @@ def test_mediapipe_backend_detects_pose_in_test_image():
     assert result.landmarks is None
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 ```bash
 cd packages/motion_capture
@@ -140,7 +140,7 @@ pytest tests/test_pose_backend.py -v
 
 Expected: FAIL with "No module named 'motion_capture.pose_backend'"
 
-- [ ] **Step 3: Implement MediaPipe pose backend**
+- [x] **Step 3: Implement MediaPipe pose backend**
 
 ```python
 # packages/motion_capture/motion_capture/pose_backend.py
@@ -214,7 +214,7 @@ class MediaPipePoseBackend(PoseBackend):
         self._pose.close()
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 ```bash
 cd packages/motion_capture
@@ -224,7 +224,7 @@ pytest tests/test_pose_backend.py -v
 
 Expected: PASS
 
-- [ ] **Step 5: Commit implementation**
+- [x] **Step 5: Commit implementation**
 
 ```bash
 git add packages/motion_capture/
@@ -239,7 +239,7 @@ git commit -m "feat(motion-capture): implement MediaPipe pose backend"
 - Create: `packages/motion_capture/motion_capture/bvh_export.py`
 - Create: `packages/motion_capture/tests/test_bvh_export.py`
 
-- [ ] **Step 1: Write failing test for BVH export**
+- [x] **Step 1: Write failing test for BVH export**
 
 ```python
 # packages/motion_capture/tests/test_bvh_export.py
@@ -274,7 +274,7 @@ def test_recording_session_tracks_duration():
     assert session.frame_count == 2
 ```
 
-- [ ] **Step 2: Implement BVH exporter**
+- [x] **Step 2: Implement BVH exporter**
 
 ```python
 # packages/motion_capture/motion_capture/bvh_export.py
@@ -367,7 +367,7 @@ class BVHExporter:
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 ```
 
-- [ ] **Step 3: Commit implementation**
+- [x] **Step 3: Commit implementation**
 
 ```bash
 git add packages/motion_capture/
@@ -382,7 +382,7 @@ git commit -m "feat(motion-capture): implement BVH exporter"
 - Create: `packages/motion_capture/motion_capture/server.py`
 - Create: `packages/motion_capture/tests/test_server.py`
 
-- [ ] **Step 1: Write failing test for WebSocket endpoint**
+- [x] **Step 1: Write failing test for WebSocket endpoint**
 
 ```python
 # packages/motion_capture/tests/test_server.py
@@ -408,7 +408,7 @@ def test_websocket_connection():
         assert data["type"] == "pong"
 ```
 
-- [ ] **Step 2: Implement WebSocket server**
+- [x] **Step 2: Implement WebSocket server**
 
 ```python
 # packages/motion_capture/motion_capture/server.py
@@ -542,7 +542,7 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 3: Commit implementation**
+- [x] **Step 3: Commit implementation**
 
 ```bash
 git add packages/motion_capture/
@@ -557,7 +557,7 @@ git commit -m "feat(motion-capture): implement WebSocket server"
 - Create: `docker/motion_capture/Dockerfile`
 - Create: `docker/motion_capture/README.md`
 
-- [ ] **Step 1: Create Dockerfile**
+- [x] **Step 1: Create Dockerfile**
 
 ```dockerfile
 # docker/motion_capture/Dockerfile
@@ -576,7 +576,7 @@ EXPOSE 8001
 ENTRYPOINT ["motion-capture-server"]
 ```
 
-- [ ] **Step 2: Commit Docker setup**
+- [x] **Step 2: Commit Docker setup**
 
 ```bash
 git add docker/motion_capture/
@@ -597,6 +597,7 @@ git commit -m "feat(motion-capture): add Docker container"
 - Joint mapping is versioned in `packages/skill_foundry/skill_foundry_validation/models/g1_description/joint_map.json`.
 - Backend API integration is available at `POST /api/pipeline/retarget` (`web/backend/app/main.py` + `web/backend/app/services/retargeting.py`).
 - `GET /api/meta` exposes retargeting capability fields: `retargeting_enabled`, `retargeting_source_skeleton`, `retargeting_target_robot`.
+- BVH conversion module is implemented: `packages/skill_foundry/skill_foundry_retarget/bvh_to_trajectory.py` (+ tests).
 
 ### Task 2.1: Joint Mapping Configuration
 
@@ -605,7 +606,15 @@ git commit -m "feat(motion-capture): add Docker container"
 - Create: `packages/skill_foundry/skill_foundry_retarget/joint_map.py`
 - Create: `packages/skill_foundry/skill_foundry_validation/models/g1_description/joint_map.json`
 
-- [ ] **Step 1: Create joint_map.json configuration**
+- [x] **Step 1: Create joint_map.json configuration**
+
+Source of truth for the current production mapping:
+
+```text
+packages/skill_foundry/skill_foundry_validation/models/g1_description/joint_map.json
+```
+
+Use the file above directly in reviews/implementations. The inline JSON example below is historical and may drift.
 
 ```json
 {
@@ -639,7 +648,7 @@ git commit -m "feat(motion-capture): add Docker container"
 }
 ```
 
-- [ ] **Step 2: Implement joint map loader**
+- [x] **Step 2: Implement joint map loader**
 
 ```python
 # packages/skill_foundry/skill_foundry_retarget/joint_map.py
@@ -731,7 +740,7 @@ def load_joint_map(path: Optional[Path] = None) -> JointMap:
     )
 ```
 
-- [ ] **Step 3: Commit implementation**
+- [x] **Step 3: Commit implementation**
 
 ```bash
 git add packages/skill_foundry/skill_foundry_retarget/
@@ -746,7 +755,7 @@ git commit -m "feat(retarget): implement joint mapping configuration"
 **Files:**
 - Create: `packages/skill_foundry/skill_foundry_retarget/retarget.py`
 
-- [ ] **Step 1: Implement retargeting calculator**
+- [x] **Step 1: Implement retargeting calculator**
 
 ```python
 # packages/skill_foundry/skill_foundry_retarget/retarget.py
@@ -797,7 +806,7 @@ class Retargeter:
         return tuple(mapping["limits"]) if mapping else (-3.14, 3.14)
 ```
 
-- [ ] **Step 2: Commit implementation**
+- [x] **Step 2: Commit implementation**
 
 ```bash
 git add packages/skill_foundry/skill_foundry_retarget/
@@ -812,7 +821,7 @@ git commit -m "feat(retarget): implement human-to-G1 retargeting calculator"
 - Create: `packages/skill_foundry/skill_foundry_retarget/bvh_to_trajectory.py`
 - Create: `packages/skill_foundry/skill_foundry_retarget/tests/test_bvh_to_trajectory.py`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```python
 # packages/skill_foundry/skill_foundry_retarget/tests/test_bvh_to_trajectory.py
@@ -849,7 +858,7 @@ Frame Time: 0.033333
     assert len(trajectory["frames"]) == 2
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 ```bash
 cd packages/skill_foundry
@@ -858,7 +867,9 @@ pytest skill_foundry_retarget/tests/test_bvh_to_trajectory.py -v
 
 Expected: FAIL
 
-- [ ] **Step 3: Implement BVH to trajectory converter**
+- [x] **Step 3: Implement BVH to trajectory converter**
+
+Implementation note (current): converter is intentionally **lossy** for existing `BVHExporter` output (root-centric channels). For full-fidelity retargeting, prefer capture JSON (`frames` / `landmarks`) or upgrade exporter format.
 
 ```python
 # packages/skill_foundry/skill_foundry_retarget/bvh_to_trajectory.py
@@ -943,7 +954,7 @@ class BVHToTrajectoryConverter:
         return angles
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 ```bash
 cd packages/skill_foundry
@@ -952,7 +963,7 @@ pytest skill_foundry_retarget/tests/test_bvh_to_trajectory.py -v
 
 Expected: PASS
 
-- [ ] **Step 5: Commit implementation**
+- [x] **Step 5: Commit implementation**
 
 ```bash
 git add packages/skill_foundry/skill_foundry_retarget/
@@ -972,7 +983,7 @@ git commit -m "feat(retarget): implement BVH to reference trajectory converter"
 - Camera capture hook implemented: `web/frontend/src/hooks/useCameraCapture.ts`.
 - Motion capture WebSocket hook implemented: `web/frontend/src/hooks/useMotionCaptureWs.ts`.
 - Pose Studio integration completed through `web/frontend/src/components/MotionCapturePanel.tsx` and `web/frontend/src/pages/PoseStudio.tsx`.
-- **Recording → platform artifact:** while WebSocket recording is active, MediaPipe landmark frames are buffered; on **Stop recording** the UI calls `POST /api/platform/artifacts/{name}` with JSON `{ "frames": [N,33,3] }` (same `X-User-Id` as the motion pipeline). The Motion pipeline panel field **Landmarks artifact** is auto-filled with that filename when upload succeeds.
+- **Recording → platform artifact:** `recording_stopped` now includes both `bvh` and `landmarks_frames`; UI stores capture artifact as `{ "schema_version": "aurosy_capture_v1", "source": "motion_capture_ws", "frames": [N,33,3], "bvh": "..." }` via `POST /api/platform/artifacts/{name}` (same `X-User-Id` as the motion pipeline). Motion pipeline panel auto-fills **Landmarks artifact** on successful upload.
 - **Motion pipeline panel (`MotionPipelinePanel.tsx`):** default train path is **AMP** (`train_mode: amp`, config from `web/frontend/src/lib/motionPipelineTrainConfig.ts` with short vs standard `total_timesteps`). **Smoke** remains available as a quick contract-only job. **Build reference from landmarks** calls `build_reference` with `landmarks_artifact`.
 - API client now includes:
   - `motionCaptureWebSocketUrl()` with `VITE_MOTION_CAPTURE_WS_URL` override
@@ -985,7 +996,7 @@ git commit -m "feat(retarget): implement BVH to reference trajectory converter"
 **Files:**
 - Create: `web/frontend/src/hooks/useCameraCapture.ts`
 
-- [ ] **Step 1: Implement camera capture hook**
+- [x] **Step 1: Implement camera capture hook**
 
 ```typescript
 // web/frontend/src/hooks/useCameraCapture.ts
@@ -1047,7 +1058,7 @@ export function useCameraCapture() {
 }
 ```
 
-- [ ] **Step 2: Commit implementation**
+- [x] **Step 2: Commit implementation**
 
 ```bash
 git add web/frontend/src/hooks/useCameraCapture.ts
@@ -1061,7 +1072,7 @@ git commit -m "feat(frontend): implement camera capture hook"
 **Files:**
 - Create: `web/frontend/src/hooks/useMotionCaptureWs.ts`
 
-- [ ] **Step 1: Implement WebSocket hook**
+- [x] **Step 1: Implement WebSocket hook**
 
 ```typescript
 // web/frontend/src/hooks/useMotionCaptureWs.ts
@@ -1116,7 +1127,7 @@ export function useMotionCaptureWs() {
 }
 ```
 
-- [ ] **Step 2: Commit implementation**
+- [x] **Step 2: Commit implementation**
 
 ```bash
 git add web/frontend/src/hooks/useMotionCaptureWs.ts
@@ -1130,7 +1141,7 @@ git commit -m "feat(frontend): implement motion capture WebSocket hook"
 **Files:**
 - Create: `web/frontend/src/components/MotionCapturePanel.tsx`
 
-- [ ] **Step 1: Implement motion capture panel**
+- [x] **Step 1: Implement motion capture panel**
 
 ```tsx
 // web/frontend/src/components/MotionCapturePanel.tsx
@@ -1195,7 +1206,7 @@ export function MotionCapturePanel({ onPoseUpdate, onRecordingComplete, motionCa
 }
 ```
 
-- [ ] **Step 2: Add i18n translations to en.json**
+- [x] **Step 2: Add i18n translations to en.json**
 
 ```json
 "motionCapture": {
@@ -1211,7 +1222,7 @@ export function MotionCapturePanel({ onPoseUpdate, onRecordingComplete, motionCa
 }
 ```
 
-- [ ] **Step 3: Commit implementation**
+- [x] **Step 3: Commit implementation**
 
 ```bash
 git add web/frontend/src/components/MotionCapturePanel.tsx
@@ -1245,7 +1256,7 @@ git commit -m "feat(frontend): implement motion capture panel component"
 
 ### Task 4.0: Validate AMP pipeline wiring
 
-- [ ] **Step 1: Run AMP unit tests**
+- [x] **Step 1: Run AMP unit tests**
 
 ```bash
 pytest /Users/sarkhan/AUROSY_creators_factory_platform/packages/skill_foundry/skill_foundry_rl/tests/test_reference_motion.py \
@@ -1253,13 +1264,13 @@ pytest /Users/sarkhan/AUROSY_creators_factory_platform/packages/skill_foundry/sk
   /Users/sarkhan/AUROSY_creators_factory_platform/packages/skill_foundry/skill_foundry_rl/tests/test_cli_amp_mode.py -q
 ```
 
-- [ ] **Step 2: Run short AMP training smoke**
+- [x] **Step 2: Run short AMP training smoke**
 
 ```bash
 pytest /Users/sarkhan/AUROSY_creators_factory_platform/packages/skill_foundry/skill_foundry_rl/tests/test_amp_train_short.py -q
 ```
 
-- [ ] **Step 3: Verify backend API keeps AMP mode in contracts**
+- [x] **Step 3: Verify backend API keeps AMP mode in contracts**
 
 ```bash
 python -m pytest /Users/sarkhan/AUROSY_creators_factory_platform/web/backend/tests/test_retarget_api.py -q
@@ -1511,7 +1522,7 @@ git commit -m "feat(api): add motion eval/export fields to backend contracts"
 
 - **Orchestration:** `web/backend/app/services/motion_pipeline.py` persists per-user state under `users/<user_id>/motion_pipelines/<pipeline_id>/state.json` (stages: `capture`, `reference`, `train`, `eval`, `export` with `status`, `completed_at`, `error`, plus `job_id` / `package_id` where applicable).
 - **API:** `POST /api/pipeline/motion/run` (body: `pipeline_id`, `action`, optional artifacts and train fields) and `GET /api/pipeline/motion/{pipeline_id}` — see `web/backend/app/main.py`. Idempotency: repeating `enqueue_train` or `request_pack` with the same `pipeline_id` returns the existing `job_id` / `package_id` unless `force: true`.
-- **Reference build:** `action: build_reference` accepts either `reference_artifact` (copy from `POST /api/platform/artifacts/{name}`) or `landmarks_artifact` (JSON array `[N,33,3]` or `{ "landmarks": ... }` / `{ "frames": ... }`) plus server-side retargeting into `reference_trajectory.json` in the pipeline directory.
+- **Reference build:** `action: build_reference` accepts `reference_artifact`, `landmarks_artifact`, `capture_artifact` (JSON capture payload), and `bvh_artifact`. `.bvh` path uses `skill_foundry_retarget.bvh_to_trajectory` to synthesize landmarks before retargeting.
 - **`GET /api/meta`:** exposes `motion_pipeline_enabled` and optional `motion_publish_max_mse` (`G1_MOTION_PUBLISH_MAX_MSE`).
 
 ### Task 6.1: Pipeline Orchestration Contract
@@ -1530,7 +1541,7 @@ git commit -m "feat(api): add motion eval/export fields to backend contracts"
   - Re-running `enqueue_train` / `request_pack` without `force` is safe for duplicate side effects.
 
 - [x] **Step 3: Add integration test**
-  - `web/backend/tests/test_motion_pipeline_flow.py` covers init, `build_reference`, enqueue idempotency.
+  - `web/backend/tests/test_motion_pipeline_flow.py` covers init, `build_reference` (reference/json + bvh), enqueue idempotency.
 
 - [ ] **Step 4: Commit implementation**
 
@@ -1700,29 +1711,3 @@ pytest tests/test_motion_bundle_validation.py -q
 - [../deployment/vast-ai-training.md](../deployment/vast-ai-training.md) — Cloud GPU training
 
 ---
-
-## Critical Architecture Decisions
-
-### Decision 1: Asynchronous Training
-
-**Choice:** Job queue with polling from UI
-
-**Rationale:** AMP training takes hours. Synchronous HTTP requests would timeout. The existing Phase 5 job queue infrastructure (`G1_PLATFORM_WORKER_ENABLED`) provides the foundation.
-
-**Implementation:** Extend existing job types to include `motion_training`. Frontend polls `/api/jobs/{id}` for status.
-
-### Decision 2: BVH Storage
-
-**Choice:** Local storage in user workspace with upload to Vast.ai
-
-**Rationale:** BVH files can be large (10-50MB for long recordings). Local storage simplifies the MVP. The existing `vast_training/` sync mechanism handles upload to cloud workers.
-
-**Implementation:** Store in `data/platform/users/{user_id}/motions/`. Upload via `setup_vast.sh` or rsync before training.
-
-### Decision 3: MediaPipe vs ViTPose
-
-**Choice:** MediaPipe as default, ViTPose as optional
-
-**Rationale:** MediaPipe runs on CPU without GPU, making it accessible to all users. ViTPose provides higher quality but requires GPU.
-
-**Implementation:** `motion_capture.pose_backend` abstraction allows swapping backends. Default to MediaPipe, enable ViTPose via config.

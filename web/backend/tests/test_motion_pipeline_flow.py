@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 TEST_FILE = Path(__file__).resolve()
@@ -134,3 +135,59 @@ def test_unknown_pipeline_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     s = Settings()
     with pytest.raises(MotionPipelineError):
         get_motion_pipeline_state(s, "u1", "missing")
+
+
+@pytest.mark.asyncio
+async def test_build_reference_from_bvh_artifact(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("G1_PLATFORM_DATA_DIR", str(tmp_path / "pdata"))
+    s = Settings()
+    root = s.resolved_platform_data_dir()
+    uid = "u1"
+    pid = "run-004"
+    art = root / "users" / uid / "artifacts"
+    art.mkdir(parents=True, exist_ok=True)
+    (art / "capture.bvh").write_text(
+        "\n".join(
+            [
+                "HIERARCHY",
+                "ROOT Hips",
+                "{",
+                "  OFFSET 0.0 0.0 0.0",
+                "  CHANNELS 6 Xposition Yposition Zposition Zrotation Xrotation Yrotation",
+                "  End Site",
+                "  {",
+                "    OFFSET 0.0 10.0 0.0",
+                "  }",
+                "}",
+                "MOTION",
+                "Frames: 2",
+                "Frame Time: 0.033333",
+                "0.0 0.0 0.0 0.0 0.0 0.0",
+                "1.0 0.0 0.0 0.0 0.0 0.0",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    class _FakeRetargetResult:
+        def __init__(self) -> None:
+            self.joint_angles_rad = np.zeros((2, 29), dtype=np.float32)
+
+    def _fake_run_retargeting(**kwargs: object) -> _FakeRetargetResult:
+        frames = kwargs.get("frames")
+        assert isinstance(frames, np.ndarray)
+        assert frames.shape == (2, 33, 3)
+        return _FakeRetargetResult()
+
+    monkeypatch.setattr("app.services.motion_pipeline.run_retargeting", _fake_run_retargeting)
+
+    await run_motion_pipeline_action(s, uid, pipeline_id=pid, action="init")
+    await run_motion_pipeline_action(
+        s,
+        uid,
+        pipeline_id=pid,
+        action="build_reference",
+        bvh_artifact="capture.bvh",
+    )
+    st = get_motion_pipeline_state(s, uid, pid)
+    assert st["state"]["stages"]["reference"]["status"] == "done"

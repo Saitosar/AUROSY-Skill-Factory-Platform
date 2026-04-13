@@ -50,9 +50,16 @@ class CaptureSession:
         self.recording.clear()
         self.is_recording = True
 
-    def stop_recording(self) -> str:
+    def stop_recording(self) -> Dict:
         self.is_recording = False
-        return self.exporter.export(self.recording)
+        bvh = self.exporter.export(self.recording)
+        landmarks_frames = [frame.tolist() for frame, _ in self.recording.frames]
+        return {
+            "bvh": bvh,
+            "duration_sec": self.recording.duration_sec,
+            "frame_count": self.recording.frame_count,
+            "landmarks_frames": landmarks_frames,
+        }
 
 
 def create_app() -> FastAPI:
@@ -92,13 +99,14 @@ def create_app() -> FastAPI:
                         session.start_recording()
                         await websocket.send_json({"type": "recording_started"})
                     elif msg_type == "stop_recording":
-                        bvh_content = session.stop_recording()
+                        record_result = session.stop_recording()
                         await websocket.send_json(
                             {
                                 "type": "recording_stopped",
-                                "bvh": bvh_content,
-                                "duration_sec": session.recording.duration_sec,
-                                "frame_count": session.recording.frame_count,
+                                "bvh": record_result["bvh"],
+                                "duration_sec": record_result["duration_sec"],
+                                "frame_count": record_result["frame_count"],
+                                "landmarks_frames": record_result["landmarks_frames"],
                             }
                         )
 

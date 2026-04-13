@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -13,6 +14,8 @@ import urllib.request
 
 import numpy as np
 import mediapipe as mp
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_POSE_LANDMARKER_MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/"
@@ -197,6 +200,24 @@ class MediaPipePoseBackend(PoseBackend):
             self._pose.close()
 
 
+class ViTPosePoseBackend(PoseBackend):
+    """Reserved backend placeholder for future GPU ViTPose integration."""
+
+    LANDMARK_COUNT = 33
+    DEFERRED_REASON = (
+        "MOTION_CAPTURE_BACKEND=vitpose is not implemented yet. "
+        "Install optional deps with `pip install -e \".[vitpose]\"`, "
+        "then wire ViTPose keypoints to 33 MediaPipe landmarks in "
+        "ViTPosePoseBackend before enabling it."
+    )
+
+    def process_frame(self, frame: np.ndarray) -> PoseResult:  # pragma: no cover - guarded by factory
+        raise RuntimeError(self.DEFERRED_REASON)
+
+    def close(self) -> None:
+        return None
+
+
 def create_pose_backend_from_env() -> PoseBackend:
     """
     Select pose backend from ``MOTION_CAPTURE_BACKEND`` (default: ``mediapipe``).
@@ -206,16 +227,10 @@ def create_pose_backend_from_env() -> PoseBackend:
     """
     name = os.environ.get("MOTION_CAPTURE_BACKEND", "mediapipe").strip().lower()
     if name == "vitpose":
-        raise RuntimeError(
-            "MOTION_CAPTURE_BACKEND=vitpose is not implemented yet. "
-            "Use mediapipe (default), or install optional deps and implement ViTPosePoseBackend — "
-            "see packages/motion_capture/README.md."
-        )
+        raise RuntimeError(ViTPosePoseBackend.DEFERRED_REASON)
     if name not in ("mediapipe", ""):
         # Unknown value: stay on MediaPipe but make misconfiguration visible in logs.
-        import logging
-
-        logging.getLogger(__name__).warning(
+        logger.warning(
             "Unknown MOTION_CAPTURE_BACKEND=%r; using mediapipe.",
             name,
         )
