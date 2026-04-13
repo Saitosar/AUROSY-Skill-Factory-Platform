@@ -1,0 +1,11 @@
+{
+  "source_url": "https://github.com/unitreerobotics/unitree_rl_gym/blob/main/deploy/pre_train/g1/motion.pt",
+  "upstream_commit": "276801e46c5d",
+  "upstream_date": "2025-07-25",
+  "downloaded_at": "2026-04-13T10:59:02.873834+00:00",
+  "file_size_bytes": 145745,
+  "load_method": "torch.jit.load",
+  "type": "ScriptModule",
+  "code_preview": "def forward(self,\n    x: Tensor) -> Tensor:\n  memory = self.memory\n  _0 = torch.unsqueeze(x, 0)\n  hidden_state = self.hidden_state\n  cell_state = self.cell_state\n  _1 = (memory).forward__0(_0, (hidden_state, cell_state), )\n  out, _2, = _1\n  h, c, = _2\n  hidden_state0 = self.hidden_state\n  _3 = torch.copy_(torch.slice(hidden_state0), h)\n  cell_state0 = self.cell_state\n  _4 = torch.copy_(torch.slice(cell_state0), c)\n  actor = self.actor\n  _5 = (actor).forward(torch.squeeze(out, 0), )\n  return _5\n",
+  "graph_preview": "graph(%self.1 : __torch__.legged_gym.utils.helpers.PolicyExporterLSTM,\n      %x.1 : Tensor):\n  %32 : bool = prim::Constant[value=0]()\n  %29 : int = prim::Constant[value=1]()\n  %27 : NoneType = prim::Constant()\n  %5 : int = prim::Constant[value=0]() # /home/craipy/project/unitree-github/unitree_rl_gym/legged_gym/utils/helpers.py:174:46\n  %memory.1 : __torch__.torch.nn.modules.rnn.LSTM = prim::GetAttr[name=\"memory\"](%self.1)\n  %6 : Tensor = aten::unsqueeze(%x.1, %5) # /home/craipy/project/unitree-github/unitree_rl_gym/legged_gym/utils/helpers.py:174:34\n  %hidden_state.1 : Tensor = prim::GetAttr[name=\"hidden_state\"](%self.1)\n  %cell_state.1 : Tensor = prim::GetAttr[name=\"cell_state\"](%self.1)\n  %15 : (Tensor, Tensor) = prim::TupleConstruct(%hidden_state.1, %cell_state.1)\n  %16 : (Tensor, (Ten"
+}
