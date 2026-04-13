@@ -1,0 +1,35 @@
+# Example training config using Unitree walking reference trajectory
+# Use with: skill-foundry-train --config train_config_example.yaml
+
+seed: 42
+
+env:
+  mjcf_path: "unitree_mujoco/unitree_robots/g1/scene_29dof.xml"
+  sim_dt: 0.005
+  min_base_height: 0.2
+
+ppo:
+  learning_rate: 3.0e-4
+  n_steps: 2048
+  batch_size: 256
+  n_epochs: 10
+  gamma: 0.99
+  total_timesteps: 500000
+
+early_stop:
+  eval_freq: 4096
+  plateau_patience: 10
+  plateau_min_delta: 0.01
+
+# Optional: enable behavioral cloning pre-training
+# bc:
+#   enabled: true
+#   epochs: 50
+#   lr: 1.0e-3
+#   demonstration_dataset: "path/to/demonstration_dataset.json"
+
+# Reference trajectory from Unitree policy rollout
+# Note: This trajectory was recorded from unitree_rl_gym/deploy/pre_train/g1/motion.pt
+# The original policy controls only 12 DOF (legs). Remaining 17 DOF (waist + arms)
+# are filled with neutral positions.
+# reference_path: "packages/skill_foundry/external_artifacts/unitree_rl_gym/reference_trajectory.json"

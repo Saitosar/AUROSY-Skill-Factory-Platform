@@ -254,3 +254,37 @@ python train_cortex.py \
 - **skill_foundry_validation**: использует те же collision checks
 - **skill_foundry_sim**: headless playback для валидации
 - **skill_foundry_runtime**: загружает обученные политики на робота
+
+## Внешние артефакты: Unitree RL Gym
+
+Можно использовать предобученные политики из [unitree_rl_gym](https://github.com/unitreerobotics/unitree_rl_gym) как источник reference trajectories для обучения.
+
+### Что такое `motion.pt`?
+
+Файл `deploy/pre_train/g1/motion.pt` — это **TorchScript LSTM-политика** (не тензор траектории). Политика управляет только **12 DOF** (ноги), а не полными 29 DOF G1.
+
+### Конвертация в ReferenceTrajectory
+
+```bash
+cd packages/skill_foundry/external_artifacts/unitree_rl_gym
+
+# 1. Записать rollout из политики
+python rollout_recorder.py --duration 10.0 --hz 50
+
+# 2. Конвертировать в 29-DOF reference (ноги из rollout, руки/waist = neutral)
+python convert_to_reference.py
+
+# 3. Опционально: конвертировать в authoring формат для UI
+python convert_to_authoring.py --keyframes 10
+```
+
+### Ограничения
+
+| Аспект | Ограничение |
+|--------|-------------|
+| DOF | Политика управляет только 12 из 29 суставов (ноги) |
+| Движение | Только ходьба, нет манипуляций руками |
+| Waist | Фиксирован в нуле |
+| Arms | Заполняются нейтральной позой |
+
+Подробности: [`packages/skill_foundry/external_artifacts/unitree_rl_gym/README.md`](../../packages/skill_foundry/external_artifacts/unitree_rl_gym/README.md)

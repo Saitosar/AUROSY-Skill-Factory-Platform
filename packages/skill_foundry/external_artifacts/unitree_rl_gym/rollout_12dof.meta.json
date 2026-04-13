@@ -1,0 +1,29 @@
+{
+  "policy_path": "/Users/sarkhan/AUROSY_creators_factory_platform/packages/skill_foundry/external_artifacts/unitree_rl_gym/motion.pt",
+  "xml_path": "/Users/sarkhan/AUROSY_creators_factory_platform/unitree_mujoco/unitree_robots/g1/scene.xml",
+  "duration_s": 5.0,
+  "output_hz": 50.0,
+  "simulation_dt": 0.002,
+  "control_decimation": 10,
+  "num_actions": 12,
+  "default_angles": [
+    -0.10000000149011612,
+    0.0,
+    0.0,
+    0.30000001192092896,
+    -0.20000000298023224,
+    0.0,
+    -0.10000000149011612,
+    0.0,
+    0.0,
+    0.30000001192092896,
+    -0.20000000298023224,
+    0.0
+  ],
+  "cmd": [
+    0.5,
+    0.0,
+    0.0
+  ],
+  "recorded_at": "2026-04-13T11:00:19.448553+00:00"
+}

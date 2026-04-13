@@ -88,6 +88,18 @@ For Phase 0, they are treated as source material. Migration/adaptation path:
 
 Phase 2 SimPlayback in MuJoCo uses the same radians, `joint_order`, and `root_not_in_reference` semantics; see [06_phase2_sim_playback.md](06_phase2_sim_playback.md).
 
+### External source: Unitree RL Gym
+
+Pre-trained policies from [unitree_rl_gym](https://github.com/unitreerobotics/unitree_rl_gym) can be converted to ReferenceTrajectory v1:
+
+- **Source:** `deploy/pre_train/g1/motion.pt` (TorchScript LSTM policy, 12 DOF legs only)
+- **Conversion:** Run policy in MuJoCo → record joint positions → expand 12→29 DOF
+- **Limitation:** Only leg joints are from the policy; waist=0, arms=neutral pose
+
+Tools: `packages/skill_foundry/external_artifacts/unitree_rl_gym/`
+
+**Units note:** Authoring uses **degrees**, training uses **radians**. The conversion scripts handle this automatically.
+
 ## 5) Validation (schema / contracts)
 
 This section is **JSON schema validation** for authoring and dataset files. **Product validation** of trained policies (tracking MSE, falls, publish thresholds) is **Phase 6.1** — [12_phase6_product_validation.md](12_phase6_product_validation.md).

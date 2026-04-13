@@ -103,6 +103,9 @@ python -c "import pinocchio; print('Pinocchio: OK')"
 # С локальной машины
 scp -P <PORT> reference_trajectory.json root@<IP>:/workspace/data/
 scp -P <PORT> scene_29dof.xml root@<IP>:/workspace/data/
+
+# Или использовать готовую траекторию из Unitree RL Gym:
+scp -P <PORT> packages/skill_foundry/external_artifacts/unitree_rl_gym/reference_trajectory.json root@<IP>:/workspace/data/
 ```
 
 ### Через Syncthing (для больших файлов)
