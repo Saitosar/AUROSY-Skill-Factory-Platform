@@ -41,3 +41,23 @@ UI сохраняет платформенный артефакт формата
 ## Как фронтенд находит endpoint capture-сервиса?
 
 Через `VITE_MOTION_CAPTURE_WS_URL`. Если переменная не задана, клиент использует URL по умолчанию (`ws://<host>:8001/ws/capture`).
+
+## Где включается сглаживание retarget-последовательностей?
+
+На backend в `web/backend/app/services/retargeting.py`: после `Retargeter.compute_batch(...)` применяется EMA (`alpha=0.6`) для последовательностей (`N > 1`).
+
+## Как включить ONNX-балансировщик в live capture?
+
+Задайте `MOTION_CAPTURE_BALANCE_ONNX=/abs/path/to/balance_policy.onnx` перед запуском `motion_capture` сервиса. Если переменная не задана или модель невалидна, сервис работает без balance-коррекции.
+
+## Что отправляет `pose` сообщение из capture-сервиса?
+
+Базовые поля: `landmarks`, `confidence`, `timestamp_ms`.  
+Если доступен retarget-модуль, дополнительно отправляются `joint_order` и `joint_angles_rad`; при включенном ONNX-балансе также поле `balance_timing_ms`.
+
+## Какие основные проблемы с Live Mode встречаются в проде?
+
+- `WS /ws/capture` доступен, но API `:8000` недоступен (или наоборот).
+- Неправильный shape landmarks (должно быть `[33,3]`).
+- Несогласованный `joint_map` между frontend/platform.
+- Отсутствие DDS-моста при `telemetry_mode=dds` (нужен fallback на mock для UI-проверок).

@@ -7,41 +7,14 @@ from typing import Iterable
 
 import numpy as np
 
+from .analytic_ik import EPS, angle_3points, signed_angle
 from .joint_map import G1_JOINT_ORDER, JointMap, JointMapping, load_joint_map
-
-_EPS = 1e-8
 
 
 @dataclass(frozen=True)
 class RetargetResult:
     joint_angles_rad: np.ndarray
     warnings: tuple[str, ...]
-
-
-def _safe_unit(v: np.ndarray) -> np.ndarray:
-    norm = float(np.linalg.norm(v))
-    if norm <= _EPS:
-        return np.zeros(3, dtype=np.float32)
-    return (v / norm).astype(np.float32)
-
-
-def _signed_angle(v1: np.ndarray, v2: np.ndarray, axis: np.ndarray) -> float:
-    n1 = _safe_unit(v1)
-    n2 = _safe_unit(v2)
-    n_axis = _safe_unit(axis)
-    if not np.any(n1) or not np.any(n2) or not np.any(n_axis):
-        return 0.0
-    unsigned = float(np.arccos(np.clip(float(np.dot(n1, n2)), -1.0, 1.0)))
-    direction = float(np.dot(np.cross(n1, n2), n_axis))
-    return unsigned if direction >= 0 else -unsigned
-
-
-def angle_3points(p1: np.ndarray, p2: np.ndarray, p3: np.ndarray) -> float:
-    v1 = p1 - p2
-    v2 = p3 - p2
-    if float(np.linalg.norm(v1)) <= _EPS or float(np.linalg.norm(v2)) <= _EPS:
-        return 0.0
-    return float(np.arccos(np.clip(float(np.dot(_safe_unit(v1), _safe_unit(v2))), -1.0, 1.0)))
 
 
 class Retargeter:
@@ -92,18 +65,18 @@ class Retargeter:
         if comp == "angle_3points" and len(pts) >= 3:
             return angle_3points(pts[0], pts[1], pts[2])
         if comp == "plane_angle" and len(pts) >= 3:
-            return _signed_angle(pts[0] - pts[1], pts[2] - pts[1], axis)
+            return signed_angle(pts[0] - pts[1], pts[2] - pts[1], axis)
         if comp == "angle_between_vectors" and len(pts) >= 2:
-            return _signed_angle(pts[1] - pts[0], axis, axis)
+            return signed_angle(pts[1] - pts[0], axis, axis)
         if comp == "shoulder_tilt" and len(pts) >= 2:
             v = pts[1] - pts[0]
-            return float(np.arctan2(v[1], np.sqrt((v[0] * v[0]) + (v[2] * v[2]) + _EPS)))
+            return float(np.arctan2(v[1], np.sqrt((v[0] * v[0]) + (v[2] * v[2]) + EPS)))
         if comp == "torso_twist" and len(pts) >= 4:
             shoulder_vec = pts[1] - pts[0]
             hip_vec = pts[3] - pts[2]
-            return _signed_angle(hip_vec, shoulder_vec, axis)
+            return signed_angle(hip_vec, shoulder_vec, axis)
         if comp == "arm_twist" and len(pts) >= 3:
             upper = pts[1] - pts[0]
             lower = pts[2] - pts[1]
-            return _signed_angle(upper, lower, axis)
+            return signed_angle(upper, lower, axis)
         return 0.0

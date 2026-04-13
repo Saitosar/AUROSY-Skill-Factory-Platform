@@ -12,3 +12,10 @@
 | [FAQ.md](FAQ.md) | Практические вопросы по motion capture, retargeting и Phase 6 |
 
 **Phase 6 (E2E motion):** см. §Phase 6 в [14_video_to_motion_integration.md](14_video_to_motion_integration.md) — `POST /api/pipeline/motion/run`, `skill_foundry_export.motion_bundle_validate`, SPA: AMP по умолчанию в Motion pipeline, запись landmarks → capture artifact (`aurosy_capture_v1`) → `build_reference` (`landmarks_artifact` / `capture_artifact` / `bvh_artifact`).
+
+## Live Mode contracts (операционный минимум)
+
+- **Retarget API:** `POST /api/pipeline/retarget` (`landmarks` shape `[33,3]` или `[N,33,3]`, параметры `source_skeleton`, `target_robot`, `clip_to_limits`).
+- **Capture WS:** `WS /ws/capture` (обычно `:8001`) принимает JPEG-кадры, отдает `pose` сообщения с landmarks, confidence и опциональными `joint_angles_rad`.
+- **Smoothing:** backend применяет EMA-сглаживание последовательностей для retarget output.
+- **Balance (optional):** `MOTION_CAPTURE_BALANCE_ONNX=<path>` включает ONNX-коррекцию нижней части тела в capture-сервисе.

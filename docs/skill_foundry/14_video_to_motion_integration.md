@@ -8,6 +8,13 @@
 
 **Tech Stack:** Python (FastAPI, MediaPipe/ViTPose, MuJoCo), TypeScript/React (frontend), WebSocket streaming, BVH format, AMP/DeepMimic RL.
 
+## Current implementation delta (Live Mode 2026-04)
+
+- `POST /api/pipeline/retarget` активен в `web/backend/app/main.py` и использует `app/services/retargeting.py`.
+- В `skill_foundry_retarget` выделены модули аналитического IK (`analytic_ik.py`) и EMA-сглаживания (`smoothing.py`).
+- `packages/motion_capture/motion_capture/server.py` поддерживает опциональный retarget output (`joint_order`, `joint_angles_rad`) и optional ONNX balance correction (`MOTION_CAPTURE_BALANCE_ONNX`).
+- Frontend Pose Studio добавляет Live Mode toggle, T-pose calibration и local MediaPipe fallback, если `WS /ws/capture` недоступен.
+
 **Repositories:**
 - **Backend/Platform:** `AUROSY_creators_factory_platform` (`packages/skill_foundry/`, `web/backend/`, `docker/`)
 - **Frontend:** `AUROSY_creators_factory` (`web/frontend/`)

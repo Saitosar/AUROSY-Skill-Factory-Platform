@@ -11,6 +11,8 @@ import numpy as np
 
 from app.services.sdk_path import ensure_sdk_on_path
 
+DEFAULT_RETARGET_EMA_ALPHA = 0.6
+
 
 @dataclass(frozen=True)
 class RetargetServiceResult:
@@ -34,7 +36,7 @@ def run_retargeting(
 ) -> RetargetServiceResult:
     ensure_sdk_on_path(sdk_root, skill_foundry_root)
 
-    from skill_foundry_retarget import Retargeter, load_joint_map
+    from skill_foundry_retarget import Retargeter, ema_smooth, load_joint_map
 
     joint_map = load_joint_map()
     if source_skeleton != joint_map.source_skeleton:
@@ -45,6 +47,8 @@ def run_retargeting(
     retargeter = Retargeter(joint_map=joint_map, clip_to_limits=clip_to_limits)
     t0 = time.perf_counter()
     joint_angles_rad, warnings = retargeter.compute_batch(frames)
+    if joint_angles_rad.shape[0] > 1:
+        joint_angles_rad = ema_smooth(joint_angles_rad, alpha=DEFAULT_RETARGET_EMA_ALPHA)
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
     return RetargetServiceResult(
