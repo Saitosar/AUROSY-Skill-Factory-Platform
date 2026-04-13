@@ -32,6 +32,46 @@ flowchart LR
 
 `DemonstrationDataset` может использоваться для offline imitation / инициализации политики параллельно или до этапа RL-only.
 
+**Путь video-to-motion (Phase 2 Retargeting):**
+
+```mermaid
+flowchart LR
+  capture[MotionCaptureService_MediaPipe33] --> retarget[RetargetingEngine]
+  retarget --> refJson[ReferenceTrajectoryJSON]
+  refJson --> playback[SimPlayback]
+  refJson --> queue[TrainingOrchestrator]
+```
+
+`RetargetingEngine` реализован в `packages/skill_foundry/skill_foundry_retarget/` и доступен в API через `POST /api/pipeline/retarget`.
+
+**Путь Phase 3 (Frontend Camera Live Track):**
+
+```mermaid
+flowchart LR
+  cam[BrowserCamera_getUserMedia] --> wsCap[MotionCaptureService_WS_capture]
+  wsCap --> lmk[MediaPipeLandmarks_33x3]
+  lmk --> retargetApi[FastAPI_POST_api_pipeline_retarget]
+  retargetApi --> poseUi[PoseStudioState]
+  poseUi --> wasm[MuJoCoG1Viewer_WASM]
+```
+
+Фронтенд реализован в `AUROSY_creators_factory/web/frontend/` (`useCameraCapture`, `useMotionCaptureWs`, `MotionCapturePanel`) и использует отдельный WS endpoint motion-capture сервиса (`/ws/capture`) плюс ретаргетинг через платформенный API.
+
+**Путь Phase 6 (сквозной motion pipeline на платформе):**
+
+```mermaid
+flowchart LR
+  ui[MotionPipelinePanel_SPA] --> run[POST_api_pipeline_motion_run]
+  run --> state[motion_pipelines_state_json]
+  run --> jobs[POST_api_jobs_train]
+  jobs --> worker[platform_worker_train]
+  worker --> pack[POST_api_packages_from_job]
+  pack --> pub[PATCH_api_packages_publish]
+  pub --> gate[motion_bundle_validate_tarball]
+```
+
+Состояние стадий и ссылки на train job / package id хранятся в `web/backend/app/services/motion_pipeline.py`. Валидация tarball при публикации motion-навыка — `skill_foundry_export.motion_bundle_validate`.
+
 ---
 
 ## 1. Authoring UI / SDK
@@ -131,7 +171,7 @@ flowchart LR
 
 **Назначение:** очередь задач обучения (по запросу пользователя или батчами), выбор GPU-воркера, ретраи, таймауты, агрегация статусов.
 
-**Входы:** задание (ID артефакта, тип: только референс / + демонстрации, гиперпараметры по умолчанию или пресеты).
+**Входы:** задание (ID артефакта, тип: только референс / + демонстрации, режим обучения `smoke` / `train` / `amp`, гиперпараметры по умолчанию или пресеты).
 
 **Выходы:** job id, ссылка на логи и метрики, ссылка на чекпоинты после успеха.
 
@@ -143,7 +183,7 @@ flowchart LR
 
 ## 6. RL worker (контейнер)
 
-**Назначение:** изолированная среда обучения: симулятор (например MuJoCo + слой как в mjlab), параллельные среды, алгоритм (PPO и др.), функции наград (tracking, survival, energy), экспорт чекпоинтов.
+**Назначение:** изолированная среда обучения: симулятор (например MuJoCo + слой как в mjlab), параллельные среды, алгоритмы PPO и AMP, функции наград (tracking, survival, energy) и AMP-дискриминатор для motion prior, экспорт чекпоинтов.
 
 **Входы:** ReferenceTrajectory и/или DemonstrationDataset; конфиг среды и робота; сиды.
 
@@ -154,6 +194,8 @@ flowchart LR
 **Полное обучение (фаза 3.2):** среда MuJoCo, наблюдения, награды (tracking / survival / energy / jerk), PPO и критерии остановки — см. [09_phase3_env_rewards.md](../archive/09_phase3_env_rewards.md) (задача 3.2 в [03_implementation_plan.md](03_implementation_plan.md)).
 
 **Опционально (фаза 3.3):** offline behavior cloning по `DemonstrationDataset` перед PPO — см. [09b_phase3_demonstration_bc.md](../archive/09b_phase3_demonstration_bc.md).
+
+**AMP pipeline (фаза 4.0):** режим `skill-foundry-train --mode amp` использует те же `ReferenceTrajectory`/`G1TrackingEnv`, плюс блоки `reference_motion.py`, `amp_discriminator.py`, `amp_train.py` для adversarial motion prior — см. [14_video_to_motion_integration.md](14_video_to_motion_integration.md).
 
 **Примечания:** число параллельных сред зависит от GPU и задачи; не фиксировать как константу в архитектуре.
 
@@ -264,6 +306,7 @@ flowchart LR
 - Среда и награды RL (фаза 3.2): [09_phase3_env_rewards.md](../archive/09_phase3_env_rewards.md).
 - BC и демонстрации (фаза 3.3): [09b_phase3_demonstration_bc.md](../archive/09b_phase3_demonstration_bc.md).
 - Manifest и экспорт (фаза 4): [10_phase4_manifest_export.md](../archive/10_phase4_manifest_export.md).
+- Video-to-motion: AMP eval, `eval_motion.json`, расширение manifest (`motion`), платформенные поля job — [14_video_to_motion_integration.md](14_video_to_motion_integration.md) (Phase 5).
 - Платформа: оркестратор обучения и каталог (фаза 5): [11_phase5_platform.md](../archive/11_phase5_platform.md).
 - Продуктовая валидация и пороги (фаза 6.1): [12_phase6_product_validation.md](../archive/12_phase6_product_validation.md).
 - Безопасность рантайма и данных (фаза 6.2): [13_phase6_runtime_security.md](13_phase6_runtime_security.md).

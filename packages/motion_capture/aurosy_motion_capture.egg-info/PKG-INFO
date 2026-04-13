@@ -1,0 +1,53 @@
+Metadata-Version: 2.4
+Name: aurosy-motion-capture
+Version: 0.1.0
+Summary: Motion capture service for AUROSY Skill Factory
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.109.0
+Requires-Dist: uvicorn[standard]>=0.27.0
+Requires-Dist: websockets>=12.0
+Requires-Dist: mediapipe>=0.10.9
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: opencv-python>=4.8.0
+Requires-Dist: certifi>=2024.2.2
+Provides-Extra: vitpose
+Requires-Dist: mmpose>=1.3.0; extra == "vitpose"
+Requires-Dist: mmcv>=2.1.0; extra == "vitpose"
+Requires-Dist: torch>=2.0.0; extra == "vitpose"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: httpx>=0.27.0; extra == "dev"
+
+# AUROSY Motion Capture Service
+
+Standalone service that receives JPEG frames over WebSocket, runs pose estimation, streams detected landmarks back to the client, and exports a BVH clip for recorded sessions.
+
+## Quickstart
+
+```bash
+cd packages/motion_capture
+pip install -e ".[dev]"
+motion-capture-server
+```
+
+## Endpoints
+
+- `GET /health` - service health status.
+- `WS /ws/capture` - real-time capture stream.
+
+## WebSocket Message Types
+
+Client to server:
+- Binary JPEG frame bytes.
+- `{"type":"ping"}`
+- `{"type":"start_recording"}`
+- `{"type":"stop_recording"}`
+
+Server to client:
+- `{"type":"pong"}`
+- `{"type":"pose", ...}`
+- `{"type":"recording_started"}`
+- `{"type":"recording_stopped", "bvh": "...", ...}`
+

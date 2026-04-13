@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+aurosy_motion_capture.egg-info/PKG-INFO
+aurosy_motion_capture.egg-info/SOURCES.txt
+aurosy_motion_capture.egg-info/dependency_links.txt
+aurosy_motion_capture.egg-info/entry_points.txt
+aurosy_motion_capture.egg-info/requires.txt
+aurosy_motion_capture.egg-info/top_level.txt
+motion_capture/__init__.py
+motion_capture/bvh_export.py
+motion_capture/pose_backend.py
+motion_capture/server.py
+tests/test_bvh_export.py
+tests/test_pose_backend.py
+tests/test_pose_backend_integration.py
+tests/test_server.py

@@ -53,6 +53,11 @@ def user_pose_drafts_dir(platform_root: Path, user_id: str) -> Path:
     return p
 
 
+def motion_pipeline_dir(platform_root: Path, user_id: str, pipeline_id: str) -> Path:
+    """Isolated directory for Phase 6 motion pipeline state and derived reference."""
+    return user_root(platform_root, user_id) / "motion_pipelines" / pipeline_id
+
+
 def job_workspace(platform_root: Path, user_id: str, job_id: str) -> Path:
     return user_jobs_dir(platform_root, user_id) / job_id
 

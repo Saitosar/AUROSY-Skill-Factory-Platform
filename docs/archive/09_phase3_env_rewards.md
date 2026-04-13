@@ -6,6 +6,7 @@ This document specifies task **3.2** from [03_implementation_plan.md](03_impleme
 
 - **Phase 3.1** ([08_phase3_rl_worker_docker.md](08_phase3_rl_worker_docker.md)): Docker image + `skill-foundry-train` in **`smoke`** mode — contract validation + tiny CPU torch loop (no MuJoCo RL).
 - **Phase 3.2 (this doc)**: **`train`** mode — **PPO** on `G1TrackingEnv` using the same **ReferenceTrajectory v1** and the same **PD law** as [06_phase2_sim_playback.md](06_phase2_sim_playback.md) / `skill_foundry_sim` headless playback, with a **residual** on joint targets from the policy.
+- **Phase 4.0** ([14_video_to_motion_integration.md](../skill_foundry/14_video_to_motion_integration.md)): **`amp`** mode — AMP pipeline that keeps the same env/obs contracts and adds adversarial motion prior modules (`reference_motion.py`, `amp_discriminator.py`, `amp_train.py`).
 
 ## Observation schema (`RL_OBS_SCHEMA_REF`)
 
@@ -63,7 +64,7 @@ skill-foundry-train \
   --reference-trajectory /path/to/reference_trajectory.json
 ```
 
-`--mode` defaults to `smoke`. You can set `"mode": "train"` inside the JSON instead.
+`--mode` defaults to `smoke`. You can set `"mode": "train"` inside the JSON instead. AMP path uses `"mode": "amp"` with an additional `amp` config section.
 
 ## Config example
 

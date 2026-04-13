@@ -76,6 +76,31 @@ def main(argv: list[str] | None = None) -> int:
         default=17,
         help="ONNX opset version (default: 17).",
     )
+    pack_p.add_argument(
+        "--include-amp-discriminator",
+        action="store_true",
+        help="Copy amp_discriminator.pt into the archive when present (Phase 5).",
+    )
+    pack_p.add_argument(
+        "--joint-map-version",
+        type=str,
+        default="1.0",
+        help="Retarget joint_map version recorded in manifest.motion (default: 1.0).",
+    )
+    pack_p.add_argument(
+        "--motion-source-skeleton",
+        type=str,
+        default="mediapipe_pose_33",
+        help="Source skeleton id for manifest.motion.retarget_profile.",
+    )
+    pack_p.add_argument(
+        "--record-motion-metadata",
+        action="store_true",
+        help=(
+            "Include manifest.motion retarget defaults even when no eval_motion.json / AMP run "
+            "(optional branding)."
+        ),
+    )
 
     args = parser.parse_args(argv)
 
@@ -83,6 +108,12 @@ def main(argv: list[str] | None = None) -> int:
         from skill_foundry_export.packaging import package_skill
 
         cfg = _load_json(args.train_config)
+        motion_export = None
+        if args.record_motion_metadata:
+            motion_export = {
+                "joint_map_version": args.joint_map_version,
+                "source_skeleton": args.motion_source_skeleton,
+            }
         summary = package_skill(
             train_config=cfg,
             reference_path=args.reference_trajectory,
@@ -94,6 +125,8 @@ def main(argv: list[str] | None = None) -> int:
             include_policy_pt=args.policy_pt,
             include_onnx=args.onnx,
             onnx_opset=args.onnx_opset,
+            motion_export=motion_export,
+            include_amp_discriminator=args.include_amp_discriminator,
         )
         print(json.dumps(summary, indent=2))
         return 0

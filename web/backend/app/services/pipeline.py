@@ -218,6 +218,9 @@ async def run_train(
     demonstration_path: Path | None = None,
     *,
     mode: str = "smoke",
+    eval_only: bool = False,
+    eval_checkpoint: Path | None = None,
+    eval_output: Path | None = None,
 ) -> dict[str, Any]:
     bin_tr = shutil.which("skill-foundry-train")
     if bin_tr:
@@ -244,6 +247,24 @@ async def run_train(
         )
     if demonstration_path is not None:
         cmd.extend(["--demonstration-dataset", str(demonstration_path.resolve())])
+
+    if eval_only:
+        if eval_checkpoint is None or not eval_checkpoint.is_file():
+            raise FileNotFoundError(
+                "eval_only requires eval_checkpoint path to an existing policy zip"
+            )
+        if eval_output is None:
+            raise ValueError("eval_only requires eval_output path for eval_motion.json")
+        eval_output.parent.mkdir(parents=True, exist_ok=True)
+        cmd.extend(
+            [
+                "--eval-only",
+                "--checkpoint",
+                str(eval_checkpoint.resolve()),
+                "--eval-output",
+                str(eval_output.resolve()),
+            ]
+        )
 
     env = {"PYTHONPATH": combined_pythonpath(skill_foundry_root, sdk_root)}
     code, out, err = await run_subprocess(cmd, env=env)

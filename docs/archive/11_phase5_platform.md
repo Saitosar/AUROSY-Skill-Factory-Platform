@@ -31,7 +31,7 @@ flowchart LR
 | `job_id` | UUID string |
 | `user_id` | Tenant/user identifier (from `X-User-Id` or dev default) |
 | `status` | `queued` \| `running` \| `succeeded` \| `failed` \| `cancelled` \| `rejected` |
-| `mode` | `smoke` \| `train` (passed to `skill-foundry-train`) |
+| `mode` | `smoke` \| `train` \| `amp` (passed to `skill-foundry-train`) |
 | `created_at`, `started_at`, `finished_at` | ISO 8601 timestamps (UTC) |
 | `error_message` | Set when `failed` or `rejected` |
 | `exit_code` | Subprocess exit code when finished |
@@ -112,7 +112,7 @@ All platform routes expect identity header **`X-User-Id`** (non-empty string). I
   - `reference_trajectory` (object) — written to workspace as ReferenceTrajectory JSON, **or**
   - `reference_artifact` (string) — filename under `users/<user_id>/artifacts/`.
 - Optional: `demonstration_dataset` (object) or `demonstration_artifact` (string).
-- `mode`: `smoke` \| `train` (default `smoke`).
+- `mode`: `smoke` \| `train` \| `amp` (default `smoke`).
 
 The synchronous pipeline **`POST /api/pipeline/train`** is unchanged for local/dev use; it does not use the queue or isolation guarantees.
 

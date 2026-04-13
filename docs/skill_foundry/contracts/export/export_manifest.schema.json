@@ -159,6 +159,53 @@
         }
       },
       "additionalProperties": true
+    },
+    "motion": {
+      "type": "object",
+      "description": "Phase 5: video-to-motion / AMP bundle metadata (optional).",
+      "required": ["reference_motion_source", "retarget_profile"],
+      "properties": {
+        "reference_motion_source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Bundled reference filename or URI (typically reference_trajectory.json)."
+        },
+        "retarget_profile": {
+          "type": "object",
+          "required": ["robot", "source_skeleton", "joint_map_version"],
+          "properties": {
+            "robot": { "type": "string", "minLength": 1 },
+            "source_skeleton": { "type": "string", "minLength": 1 },
+            "joint_map_version": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "eval_report": {
+          "type": "object",
+          "required": ["filename", "sha256"],
+          "properties": {
+            "filename": { "type": "string", "const": "eval_motion.json" },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "schema_version": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "amp": {
+          "type": "object",
+          "properties": {
+            "train_phase": { "type": "string" },
+            "policy_weights_filename": { "type": "string" },
+            "disc_hidden_dim": { "type": "number" },
+            "disc_num_layers": { "type": "integer" },
+            "discriminator_bundle_filename": {
+              "type": "string",
+              "const": "amp_discriminator.pt"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
     }
   },
   "additionalProperties": true

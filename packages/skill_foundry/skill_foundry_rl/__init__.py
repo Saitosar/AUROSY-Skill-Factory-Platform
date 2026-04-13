@@ -1,4 +1,4 @@
-"""Skill Foundry RL worker: smoke train (Phase 3.1) and PPO on G1TrackingEnv (Phase 3.2)."""
+"""Skill Foundry RL worker: smoke, PPO, and AMP training modes."""
 
 from skill_foundry_rl.obs_schema import RL_OBS_SCHEMA_REF
 
