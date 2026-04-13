@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 from typing import Any
 
+from app.platform_enqueue import PLATFORM_MOTION_META_NAME
 from app.services.pipeline import python_m_cmd, run_subprocess
 from app.services.sdk_path import combined_pythonpath
 
@@ -48,6 +50,23 @@ async def run_package_pack(
                 str(output_archive.resolve()),
             ]
         )
+    workspace = run_dir.parent
+    pm = workspace / PLATFORM_MOTION_META_NAME
+    if pm.is_file():
+        try:
+            meta = json.loads(pm.read_text(encoding="utf-8"))
+            me = meta.get("motion_export")
+            if isinstance(me, dict) and me:
+                cmd.extend(["--record-motion-metadata"])
+                jmv = me.get("joint_map_version")
+                if jmv is not None:
+                    cmd.extend(["--joint-map-version", str(jmv)])
+                sk = me.get("source_skeleton")
+                if sk is not None:
+                    cmd.extend(["--motion-source-skeleton", str(sk)])
+        except (json.JSONDecodeError, OSError):
+            pass
+
     env = {"PYTHONPATH": combined_pythonpath(skill_foundry_root, sdk_root)}
     code, out, err = await run_subprocess(cmd, env=env)
     return {"exit_code": code, "stdout": out, "stderr": err}

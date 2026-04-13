@@ -60,6 +60,12 @@ from app.services.pipeline import (
     which_skill_foundry,
 )
 from app.services.dds_joint_bridge import DdsJointBridge, maybe_start_dds_joint_bridge
+from app.services.motion_pipeline import (
+    MotionPipelineError,
+    get_motion_pipeline_state,
+    run_motion_pipeline_action,
+)
+from app.services.retargeting import parse_landmarks_payload, run_retargeting
 from app.services.telemetry import mock_telemetry_stream
 from app.services.validation import validate_payload
 from app.services.cortex_api import router as cortex_router
@@ -147,6 +153,30 @@ class ValidateMotionRequest(BaseModel):
     )
 
 
+class RetargetRequest(BaseModel):
+    landmarks: list[Any] = Field(description="[33,3] for single frame or [N,33,3] for sequence")
+    source_skeleton: str = "mediapipe_pose_33"
+    target_robot: str = "unitree_g1_29dof"
+    clip_to_limits: bool = True
+
+    @model_validator(mode="after")
+    def _validate_landmarks_shape(self) -> RetargetRequest:
+        parse_landmarks_payload(self.landmarks)
+        return self
+
+
+class RetargetResponse(BaseModel):
+    joint_order: list[str]
+    joint_angles_rad: list[float] | list[list[float]]
+    source_skeleton: str
+    target_robot: str
+    mapping_version: str
+    frame_count: int
+    dropped_frames: int
+    warnings: list[str]
+    timing_ms: float
+
+
 class PlaybackRequest(BaseModel):
     reference_trajectory: dict[str, Any] | None = None
     reference_path: str | None = None
@@ -165,7 +195,12 @@ class TrainRequest(BaseModel):
     config_path: str | None = None
     reference_path: str
     demonstration_path: str | None = None
-    mode: Literal["smoke", "train"] = "smoke"
+    mode: Literal["smoke", "train", "amp"] = "smoke"
+    eval_only: bool = False
+    checkpoint_path: str | None = Field(
+        default=None,
+        description="Local policy .zip for AMP eval-only (requires eval_only and mode amp).",
+    )
 
 
 class CreateTrainJobRequest(BaseModel):
@@ -179,11 +214,20 @@ class CreateTrainJobRequest(BaseModel):
         default_factory=dict,
         description="Train CLI JSON config; server adds output_dir in the job workspace.",
     )
-    mode: Literal["smoke", "train"] = "smoke"
+    mode: Literal["smoke", "train", "amp"] = "smoke"
     reference_trajectory: dict[str, Any] | None = None
     reference_artifact: str | None = None
     demonstration_dataset: dict[str, Any] | None = None
     demonstration_artifact: str | None = None
+    eval_only: bool = False
+    checkpoint_artifact: str | None = Field(
+        default=None,
+        description="User artifact filename (under /api/platform/artifacts) for AMP eval-only.",
+    )
+    motion_export: dict[str, Any] | None = Field(
+        default=None,
+        description="Optional motion manifest hints (retarget version, etc.) stored in workspace.",
+    )
 
     @model_validator(mode="after")
     def _validate_sources(self) -> CreateTrainJobRequest:
@@ -193,11 +237,47 @@ class CreateTrainJobRequest(BaseModel):
             raise ValueError("Provide exactly one of reference_trajectory or reference_artifact")
         if self.demonstration_dataset is not None and self.demonstration_artifact:
             raise ValueError("Provide at most one of demonstration_dataset or demonstration_artifact")
+        if self.eval_only:
+            if self.mode != "amp":
+                raise ValueError("eval_only requires mode amp")
+            if not self.checkpoint_artifact:
+                raise ValueError("eval_only requires checkpoint_artifact")
+        elif self.checkpoint_artifact:
+            raise ValueError("checkpoint_artifact is only valid when eval_only is true")
         return self
 
 
 class PackagePatchBody(BaseModel):
     published: bool
+
+
+class MotionPipelineRunRequest(BaseModel):
+    """Phase 6 orchestration: idempotent stages keyed by ``pipeline_id``."""
+
+    pipeline_id: str
+    action: Literal[
+        "init",
+        "attach_capture",
+        "build_reference",
+        "enqueue_train",
+        "sync",
+        "request_pack",
+    ]
+    force: bool = False
+    capture_artifact: str | None = None
+    landmarks_artifact: str | None = None
+    reference_artifact: str | None = None
+    frequency_hz: float = Field(default=50.0, gt=0)
+    train_config: dict[str, Any] = Field(default_factory=dict)
+    train_mode: Literal["smoke", "train", "amp"] = "amp"
+    demonstration_dataset: dict[str, Any] | None = None
+    demonstration_artifact: str | None = None
+    eval_only: bool = False
+    checkpoint_artifact: str | None = None
+    motion_export: dict[str, Any] | None = None
+    source_skeleton: str = "mediapipe_pose_33"
+    target_robot: str = "unitree_g1_29dof"
+    clip_to_limits: bool = True
 
 
 class JointTargetsBody(BaseModel):
@@ -234,6 +314,11 @@ def meta() -> dict[str, Any]:
         "telemetry_mode": "dds" if s.use_dds_telemetry else "mock",
         "platform_worker_enabled": bool(s.platform_worker_enabled),
         "job_timeout_sec": float(s.job_timeout_sec),
+        "retargeting_enabled": True,
+        "retargeting_source_skeleton": "mediapipe_pose_33",
+        "retargeting_target_robot": "unitree_g1_29dof",
+        "motion_pipeline_enabled": True,
+        "motion_publish_max_mse": s.motion_publish_max_mse,
     }
     out.update(meta_joint_command_fields(bool(s.joint_command_enabled)))
     out["dds_joint_bridge"] = bool(s.dds_joint_bridge)
@@ -361,6 +446,86 @@ def pipeline_validate_motion(req: ValidateMotionRequest) -> dict[str, Any]:
     return report
 
 
+@app.post("/api/pipeline/motion/run")
+async def motion_pipeline_run(
+    req: MotionPipelineRunRequest,
+    user_id: str = Depends(get_user_id),
+) -> dict[str, Any]:
+    s = get_settings()
+    try:
+        return await run_motion_pipeline_action(
+            s,
+            user_id,
+            pipeline_id=req.pipeline_id,
+            action=req.action,
+            capture_artifact=req.capture_artifact,
+            landmarks_artifact=req.landmarks_artifact,
+            reference_artifact=req.reference_artifact,
+            frequency_hz=req.frequency_hz,
+            force=req.force,
+            train_config=req.train_config,
+            train_mode=req.train_mode,
+            demonstration_dataset=req.demonstration_dataset,
+            demonstration_artifact=req.demonstration_artifact,
+            eval_only=req.eval_only,
+            checkpoint_artifact=req.checkpoint_artifact,
+            motion_export=req.motion_export,
+            source_skeleton=req.source_skeleton,
+            target_robot=req.target_robot,
+            clip_to_limits=req.clip_to_limits,
+        )
+    except MotionPipelineError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.get("/api/pipeline/motion/{pipeline_id}")
+def motion_pipeline_status(
+    pipeline_id: str,
+    user_id: str = Depends(get_user_id),
+) -> dict[str, Any]:
+    try:
+        return get_motion_pipeline_state(get_settings(), user_id, pipeline_id)
+    except MotionPipelineError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@app.post("/api/pipeline/retarget")
+def pipeline_retarget(req: RetargetRequest) -> RetargetResponse:
+    s = get_settings()
+    frames, is_sequence = parse_landmarks_payload(req.landmarks)
+    try:
+        result = run_retargeting(
+            sdk_root=s.resolved_sdk_root(),
+            skill_foundry_root=s.resolved_skill_foundry_root(),
+            frames=frames,
+            source_skeleton=req.source_skeleton,
+            target_robot=req.target_robot,
+            clip_to_limits=req.clip_to_limits,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"retarget failure: {e}") from e
+
+    joint_angles_payload: list[float] | list[list[float]]
+    if is_sequence:
+        joint_angles_payload = result.joint_angles_rad.tolist()
+    else:
+        joint_angles_payload = result.joint_angles_rad[0].tolist()
+
+    return RetargetResponse(
+        joint_order=result.joint_order,
+        joint_angles_rad=joint_angles_payload,
+        source_skeleton=result.source_skeleton,
+        target_robot=result.target_robot,
+        mapping_version=result.mapping_version,
+        frame_count=int(result.joint_angles_rad.shape[0]),
+        dropped_frames=0,
+        warnings=result.warnings,
+        timing_ms=result.elapsed_ms,
+    )
+
+
 @app.post("/api/pipeline/playback")
 async def pipeline_playback(req: PlaybackRequest) -> dict[str, Any]:
     s = get_settings()
@@ -456,8 +621,38 @@ async def pipeline_train(req: TrainRequest) -> dict[str, Any]:
         if not demo.is_file():
             return {"exit_code": 2, "stdout": "", "stderr": f"demonstration not found: {demo}"}
 
+    eval_kw: dict[str, Any] = {}
+    if req.eval_only:
+        if req.mode != "amp":
+            return {
+                "exit_code": 2,
+                "stdout": "",
+                "stderr": "eval_only requires mode amp",
+            }
+        if not req.checkpoint_path:
+            return {
+                "exit_code": 2,
+                "stdout": "",
+                "stderr": "eval_only requires checkpoint_path",
+            }
+        ck = Path(req.checkpoint_path).expanduser().resolve()
+        if not ck.is_file():
+            return {
+                "exit_code": 2,
+                "stdout": "",
+                "stderr": f"checkpoint not found: {ck}",
+            }
+        eval_out = ck.parent / "eval_motion.json"
+        eval_kw = {
+            "eval_only": True,
+            "eval_checkpoint": ck,
+            "eval_output": eval_out,
+        }
+
     try:
-        return await run_train(sdk, sf, cfg_path, ref, demo, mode=req.mode)
+        return await run_train(
+            sdk, sf, cfg_path, ref, demo, mode=req.mode, **eval_kw
+        )
     finally:
         if req.config is not None and cfg_path.is_file() and str(cfg_path).startswith(tempfile.gettempdir()):
             try:
@@ -529,6 +724,9 @@ async def jobs_train_enqueue(
             reference_artifact=req.reference_artifact,
             demonstration_dataset=req.demonstration_dataset,
             demonstration_artifact=req.demonstration_artifact,
+            eval_only=req.eval_only,
+            checkpoint_artifact=req.checkpoint_artifact,
+            motion_export=req.motion_export,
         )
     except EnqueueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -734,6 +932,36 @@ def packages_patch(
                     "metrics": extra.get("metrics"),
                 },
             )
+
+        from app.services.sdk_path import ensure_sdk_on_path
+
+        ensure_sdk_on_path(s.resolved_sdk_root(), s.resolved_skill_foundry_root())
+        from skill_foundry_export.motion_bundle_validate import (
+            read_manifest_from_tarball,
+            validate_motion_skill_bundle,
+        )
+
+        bpath = bundle_absolute_path(s, row["bundle_relpath"])
+        man = read_manifest_from_tarball(bpath)
+        if isinstance(man, dict) and isinstance(man.get("motion"), dict):
+            mv = validate_motion_skill_bundle(
+                bpath,
+                require_motion_section=True,
+                max_tracking_mse=s.motion_publish_max_mse,
+            )
+            if not mv.passed:
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "message": (
+                            "Publishing this motion skill bundle failed validation "
+                            "(manifest.motion requires eval_motion.json and optional MSE cap)."
+                        ),
+                        "motion_validation_passed": False,
+                        "failure_reasons": mv.reasons,
+                        "metrics": mv.metrics,
+                    },
+                )
 
     ok = package_set_published(db_path, package_id, user_id, body.published)
     if not ok:

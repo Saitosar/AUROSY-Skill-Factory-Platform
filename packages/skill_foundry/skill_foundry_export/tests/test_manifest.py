@@ -195,3 +195,72 @@ def test_package_skill_includes_validation_report(tmp_path: Path) -> None:
         assert pv.get("filename") == "validation_report.json"
     errs = validate_export_manifest_dict(man)
     assert errs == [], errs
+
+
+def test_package_skill_includes_eval_motion_and_motion_manifest(tmp_path: Path) -> None:
+    root = _repo_root()
+    ref_path = root / "docs" / "skill_foundry" / "golden" / "v1" / "reference_trajectory.json"
+
+    mjcf = tmp_path / "scene.xml"
+    mjcf.write_bytes(b"<mujoco><worldbody/></mujoco>")
+
+    cfg = {
+        "env": {
+            "mjcf_path": str(mjcf),
+            "sim_dt": 0.005,
+            "include_imu_in_obs": False,
+        }
+    }
+
+    import hashlib
+
+    def _sha256_bytes(data: bytes) -> str:
+        return hashlib.sha256(data).hexdigest()
+
+    ref_bytes = ref_path.read_bytes()
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    ckpt = run_dir / "ppo_amp_G1TrackingEnv.zip"
+    ckpt.write_bytes(b"PK\x03\x04fake_zip_bytes")
+
+    train_run = {
+        "reference_sha256": _sha256_bytes(ref_bytes),
+        "mjcf_sha256": _sha256_bytes(mjcf.read_bytes()),
+        "checkpoint": str(ckpt),
+        "phase": "4_amp",
+        "amp": {"disc_hidden_dim": 64, "disc_num_layers": 2},
+    }
+    (run_dir / "train_run.json").write_text(json.dumps(train_run), encoding="utf-8")
+    eval_body = {
+        "schema_version": "1.0",
+        "created_at": "2026-01-01T00:00:00+00:00",
+        "reference_sha256": "a" * 64,
+        "checkpoint": str(ckpt),
+        "rollout_steps": 5,
+        "metrics": {"tracking_mean_mse": 0.1},
+        "notes": "test",
+    }
+    (run_dir / "eval_motion.json").write_text(json.dumps(eval_body), encoding="utf-8")
+    disc = run_dir / "amp_discriminator.pt"
+    disc.write_bytes(b"torch_state_dict_placeholder")
+
+    out = tmp_path / "bundle.tar.gz"
+    tc_path = tmp_path / "train.json"
+    tc_path.write_text(json.dumps(cfg), encoding="utf-8")
+
+    summary = package_skill(
+        train_config=cfg,
+        reference_path=ref_path,
+        run_dir=run_dir,
+        output_archive=out,
+        train_config_path=tc_path,
+        include_amp_discriminator=True,
+    )
+    assert "eval_motion.json" in summary["files"]
+    assert "amp_discriminator.pt" in summary["files"]
+    man = summary["manifest"]
+    assert "motion" in man
+    assert man["motion"]["eval_report"]["filename"] == "eval_motion.json"
+    assert man["motion"]["amp"]["discriminator_bundle_filename"] == "amp_discriminator.pt"
+    errs = validate_export_manifest_dict(man)
+    assert errs == [], errs

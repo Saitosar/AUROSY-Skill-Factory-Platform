@@ -1,0 +1,2 @@
+[console_scripts]
+motion-capture-server = motion_capture.server:main

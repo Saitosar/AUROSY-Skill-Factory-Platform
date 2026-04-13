@@ -158,5 +158,25 @@ def build_manifest(
     return manifest
 
 
+def attach_motion_section(
+    manifest: dict[str, Any],
+    *,
+    reference_motion_source: str,
+    retarget_profile: dict[str, Any],
+    eval_report: dict[str, Any] | None,
+    amp: dict[str, Any] | None,
+) -> None:
+    """Add optional ``motion`` block (Phase 5); mutates ``manifest`` in place."""
+    motion: dict[str, Any] = {
+        "reference_motion_source": reference_motion_source,
+        "retarget_profile": dict(retarget_profile),
+    }
+    if eval_report is not None:
+        motion["eval_report"] = dict(eval_report)
+    if amp is not None:
+        motion["amp"] = dict(amp)
+    manifest["motion"] = motion
+
+
 def manifest_json_bytes(manifest: dict[str, Any]) -> bytes:
     return json.dumps(manifest, indent=2, sort_keys=True).encode("utf-8")

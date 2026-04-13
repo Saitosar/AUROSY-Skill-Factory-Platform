@@ -2,7 +2,7 @@
 
 В этом репозитории (**AUROSY_creators_factory_platform**) — **бэкенд** FastAPI, сабмодуль **Unitree** `unitree_sdk2_python` (upstream `unitree_sdk2py`), пакет **AUROSY** `packages/skill_foundry` (CLI `skill-foundry-*`) и документация. **SPA (Vite + React)** живёт в отдельном репозитории **AUROSY_creators_factory** (`web/frontend/`); см. `web/README.md` в корне того репозитория (типичный соседний клон: `../AUROSY_creators_factory/web/README.md`).
 
-Функциональность: авторинг Phase 0, телеметрия (mock WebSocket / DDS), сценарии mid/high level, CLI `skill-foundry-*`, Phase 5 (очередь обучения, каталог пакетов).
+Функциональность: авторинг Phase 0, телеметрия (mock WebSocket / DDS), сценарии mid/high level, CLI `skill-foundry-*`, video-to-motion retarget API, Phase 5 (очередь обучения, каталог пакетов).
 
 ## Бэкенд
 
@@ -36,6 +36,7 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 | `G1_DEV_USER_ID` | Пользователь по умолчанию, если нет заголовка `X-User-Id` (только dev) |
 | `G1_PLATFORM_WORKER_ENABLED` | `0` — не запускать фоновый воркер очереди (job’ы останутся в `queued`) |
 | `G1_SKIP_VALIDATION_GATE` | `1` / `true` — разрешить `PATCH` с `published: true` без успешной продуктовой валидации пакета (**только разработка**; в продакшене не использовать) |
+| `G1_MOTION_PUBLISH_MAX_MSE` | Опционально: верхняя граница `metrics.tracking_mean_mse` из `eval_motion.json` при публикации пакетов с `manifest.motion` (Phase 6) |
 
 Спецификация Phase 5: [docs/archive/11_phase5_platform.md](../docs/archive/11_phase5_platform.md). Безопасность рантайма и целостность пакетов (Phase 6.2): [docs/skill_foundry/13_phase6_runtime_security.md](../docs/skill_foundry/13_phase6_runtime_security.md).
 
@@ -48,7 +49,7 @@ OpenAPI: `http://127.0.0.1:8000/docs`
 **Общие**
 
 - `GET /api/health` — `{ "status": "ok" }`
-- `GET /api/meta` — `repo_root`, `sdk_python_root`, `skill_foundry_python_root`, `mjcf_default`, `telemetry_mode` (`mock` / `dds`), `platform_worker_enabled`, `job_timeout_sec`, `dds_joint_bridge`, `dds_joint_publish_hz`, `joint_command_enabled` (и связанные поля при расширении joint API)
+- `GET /api/meta` — `repo_root`, `sdk_python_root`, `skill_foundry_python_root`, `mjcf_default`, `telemetry_mode` (`mock` / `dds`), `platform_worker_enabled`, `job_timeout_sec`, `dds_joint_bridge`, `dds_joint_publish_hz`, `joint_command_enabled`, ретаргетинг (`retargeting_enabled`, `retargeting_source_skeleton`, `retargeting_target_robot`), Phase 6: `motion_pipeline_enabled`, `motion_publish_max_mse`
 
 **Суставы и пайплайн**
 
@@ -59,8 +60,11 @@ OpenAPI: `http://127.0.0.1:8000/docs`
 - `POST /api/validate` — `{ "kind": "keyframes"|"motion"|"scenario"|"reference_trajectory"|"demonstration_dataset", "payload": { ... } }`
 - `POST /api/pipeline/preprocess` — `keyframes`, опционально `frequency_hz`, `validate_motion`, `mjcf_path`
 - `POST /api/pipeline/validate-motion` — офлайн-проверка ReferenceTrajectory v1 (перед playback)
+- `POST /api/pipeline/retarget` — конвертация MediaPipe landmarks (`[33,3]` или `[N,33,3]`) в углы G1 (`joint_order` + `joint_angles_rad`) с лимитами из `joint_map.json`
+- `POST /api/pipeline/motion/run` — Phase 6: оркестрация motion-пайплайна (`pipeline_id`, `action`: `init` \| `attach_capture` \| `build_reference` \| `enqueue_train` \| `sync` \| `request_pack`, опционально `reference_artifact`, `landmarks_artifact`, `train_config`, `train_mode`, `motion_export`, `force`, …); требуется заголовок `X-User-Id` (как для Phase 5)
+- `GET /api/pipeline/motion/{pipeline_id}` — чтение и обновление стадий из job workspace (sync)
 - `POST /api/pipeline/playback` — `reference_trajectory` или `reference_path`, опционально `mjcf_path`, `mode`, `dt`, `kp`, `kd`, `seed`, `max_steps`, `write_demonstration_json`
-- `POST /api/pipeline/train` — `reference_path`, `config_path` или `config`, опционально `demonstration_path`, `mode` (синхронно)
+- `POST /api/pipeline/train` — `reference_path`, `config_path` или `config`, опционально `demonstration_path`, `mode` (`smoke` \| `train` \| `amp`, синхронно); для AMP **eval-only**: `eval_only: true`, `checkpoint_path` (путь к policy `.zip` на хосте), `mode: amp`
 
 **Сценарии и mid-level**
 
@@ -71,13 +75,24 @@ OpenAPI: `http://127.0.0.1:8000/docs`
 
 - `POST /api/platform/artifacts/{name}` — сохранить JSON-артефакт пользователя
 - `POST /api/platform/pose-drafts` — `{ "name", "document" }` — черновик keyframes с клиента (MuJoCo Pose Studio)
-- `POST /api/jobs/train` — очередь обучения (`config` опционально, по умолчанию `{}`; сервер добавляет `output_dir` в workspace)
+- `POST /api/jobs/train` — очередь обучения (`config` опционально, по умолчанию `{}`; `mode`: `smoke` \| `train` \| `amp`; сервер добавляет `output_dir` в workspace). **AMP eval-only job:** `eval_only: true`, `checkpoint_artifact` (имя файла из `POST /api/platform/artifacts/{name}`), опционально `motion_export` (dict, попадает в `platform_motion.json` и далее в флаги `skill-foundry-package` при сборке пакета из job)
 - `GET /api/jobs`, `GET /api/jobs/{job_id}`
-- `POST /api/packages/from-job/{job_id}`, `POST /api/packages/upload`, `GET /api/packages`, `GET /api/packages/{package_id}/download`, `PATCH /api/packages/{package_id}`
+- `POST /api/packages/from-job/{job_id}`, `POST /api/packages/upload`, `GET /api/packages`, `GET /api/packages/{package_id}/download`, `PATCH /api/packages/{package_id}` — для пакетов с `manifest.motion` публикация дополнительно требует `eval_motion.json` в tarball и (если задано) `tracking_mean_mse` ≤ `G1_MOTION_PUBLISH_MAX_MSE`
 
 **WebSocket**
 
 - `WebSocket /ws/telemetry` — строки JSON (`joints`, `timestamp_s`, `mock: true` в mock-режиме)
+
+### Motion capture service topology
+
+- Endpoint `WS /ws/capture` **не** входит в FastAPI процесс на `:8000`; он обслуживается отдельным сервисом `packages/motion_capture` (обычно `:8001`).
+- Frontend route `/pose` (в соседнем репозитории `AUROSY_creators_factory`) использует связку:
+  1. Camera frames -> `WS /ws/capture`
+  2. Landmarks -> `POST /api/pipeline/retarget`
+  3. Retargeted angles -> live MuJoCo preview
+  4. Опционально: после записи — `POST /api/platform/artifacts/{name}` с JSON `{ "frames": [N,33,3] }`, затем `POST /api/pipeline/motion/run` с `action: build_reference` и `landmarks_artifact` (см. §14 Phase 6).
+- Сервис `motion_capture` выбирает бэкенд по **`MOTION_CAPTURE_BACKEND`** (`mediapipe` по умолчанию; `vitpose` зарезервировано — см. `packages/motion_capture/README.md`).
+- Для настройки frontend endpoint capture-сервиса используйте `VITE_MOTION_CAPTURE_WS_URL` в UI-репозитории.
 
 ## Фронтенд (отдельный репозиторий)
 

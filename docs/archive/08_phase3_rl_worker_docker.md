@@ -12,6 +12,7 @@ Matches [02_architecture.md](02_architecture.md) §6: **Training orchestrator �
 |------|-----|------------|----------|
 | **smoke** (default) | `--mode smoke` or omit | No | Validates JSON + tiny CPU torch loop ([smoke_train.py](../../packages/skill_foundry/skill_foundry_rl/smoke_train.py)) |
 | **train** | `--mode train` | **Yes** — set `env.mjcf_path` in config to mounted `scene_29dof.xml` | PPO on `G1TrackingEnv` ([ppo_train.py](../../packages/skill_foundry/skill_foundry_rl/ppo_train.py)) |
+| **amp** (Phase 4.0) | `--mode amp` | **Yes** — same `env.mjcf_path` requirement as `train` | AMP pipeline (`reference_motion.py` + `amp_discriminator.py` + `amp_train.py`) producing PPO checkpoint + AMP discriminator checkpoint |
 
 Use [golden/v1/ppo_train_config.example.json](golden/v1/ppo_train_config.example.json) as a template for Phase 3.2. Mount `unitree_mujoco/` read-only if the image does not embed those assets.
 
@@ -42,6 +43,7 @@ Container `ENTRYPOINT` is `skill-foundry-train` (see `packages/skill_foundry/ski
 
 | Argument | Required | Description |
 |----------|----------|-------------|
+| `--mode` | no | `smoke` (default), `train`, or `amp` |
 | `--config` | yes | JSON or YAML file: `seed`, `smoke_steps`, `learning_rate`, `output_dir`, … |
 | `--reference-trajectory` | yes | Path to `reference_trajectory.json` (ReferenceTrajectory v1). |
 | `--demonstration-dataset` | no | Path to `demonstration_dataset.json` (DemonstrationDataset v1). |

@@ -17,12 +17,18 @@
 | **3.1** | Docker-образ RL worker, `skill-foundry-train` | [08_phase3_rl_worker_docker.md](../archive/08_phase3_rl_worker_docker.md) |
 | **3.2** | Среда MuJoCo, награды, PPO | [09_phase3_env_rewards.md](../archive/09_phase3_env_rewards.md) |
 | **3.3** | Behavior cloning по демонстрациям | [09b_phase3_demonstration_bc.md](../archive/09b_phase3_demonstration_bc.md) |
-| **4** | Manifest и экспорт пакета навыка | [10_phase4_manifest_export.md](../archive/10_phase4_manifest_export.md) |
+| **4.0** | AMP RL training pipeline (режим `skill-foundry-train --mode amp`) | [14_video_to_motion_integration.md](14_video_to_motion_integration.md) |
+| **4.1** | Manifest и экспорт пакета навыка | [10_phase4_manifest_export.md](../archive/10_phase4_manifest_export.md) |
 | **5** | Платформа: оркестратор, каталог, Phase 5 API | [11_phase5_platform.md](../archive/11_phase5_platform.md) |
 | **6.1** | Продуктовая валидация, пороги, гейт публикации | [12_phase6_product_validation.md](../archive/12_phase6_product_validation.md) |
 | **6.2** | Безопасность рантайма и целостность пакетов | [13_phase6_runtime_security.md](13_phase6_runtime_security.md) |
+| **6 (video §14)** | Motion skill bundle и E2E: `POST /api/pipeline/motion/run`, валидатор пакета, UI в Motion Studio | [14_video_to_motion_integration.md](14_video_to_motion_integration.md) §Phase 6 |
 
 Ссылки из корня репозитория на те же файлы: `docs/archive/<имя>.md`.
+
+**Video-to-motion — оценка и экспорт (Phase 5 документа в §14):** метрики AMP rollout → `eval_motion.json`, расширение skill bundle (`manifest.motion`), поля `POST /api/jobs/train` (`eval_only`, `checkpoint_artifact`, `motion_export`) и синхронный `POST /api/pipeline/train` (`eval_only`, `checkpoint_path`) — см. [14_video_to_motion_integration.md](14_video_to_motion_integration.md).
+
+**Video-to-motion — Phase 6 (тот же §14):** оркестрация `POST /api/pipeline/motion/run` + `GET /api/pipeline/motion/{pipeline_id}`, гейт публикации по `eval_motion.json` / `G1_MOTION_PUBLISH_MAX_MSE`, панель **Motion skill pipeline** в Motion Studio (`MotionPipelinePanel`) при `GET /api/meta` → `motion_pipeline_enabled: true`. UI: **AMP** по умолчанию (`train_mode: amp`), опциональный Smoke; связка записи камеры с `POST /api/platform/artifacts` и `landmarks_artifact` — см. §14 «Implementation status» Phase 3 и 6.
 
 ---
 

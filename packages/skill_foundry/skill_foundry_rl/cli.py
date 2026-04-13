@@ -1,4 +1,4 @@
-"""CLI: Phase 3.1 smoke train or Phase 3.2/3.3 PPO train — ReferenceTrajectory (+ optional DemonstrationDataset)."""
+"""CLI for smoke, PPO, and AMP training over ReferenceTrajectory inputs."""
 
 from __future__ import annotations
 
@@ -36,15 +36,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="skill-foundry-train",
         description=(
-            "Skill Foundry RL worker: Phase 3.1 smoke train (default) or Phase 3.2 PPO "
+            "Skill Foundry RL worker: smoke train, PPO train, or AMP train "
             "(MuJoCo G1TrackingEnv)."
         ),
     )
     parser.add_argument(
         "--mode",
-        choices=("smoke", "train"),
+        choices=("smoke", "train", "amp"),
         default="smoke",
-        help="smoke: Phase 3.1 contract + tiny torch loop; train: Phase 3.2 PPO on G1TrackingEnv.",
+        help=(
+            "smoke: Phase 3.1 contract loop; train: Phase 3.2/3.3 PPO(+BC); "
+            "amp: Phase 4 AMP pipeline."
+        ),
     )
     parser.add_argument(
         "--config",
@@ -67,6 +70,32 @@ def main(argv: list[str] | None = None) -> int:
             "Train mode: used for Phase 3.3 BC when bc.enabled is true (overrides bc.demonstration_dataset)."
         ),
     )
+    parser.add_argument(
+        "--eval-only",
+        action="store_true",
+        help=(
+            "AMP Phase 5: load policy checkpoint, rollout, write eval_motion.json "
+            "(requires --mode amp, --checkpoint)."
+        ),
+    )
+    parser.add_argument(
+        "--checkpoint",
+        type=Path,
+        default=None,
+        help="SB3 PPO zip checkpoint (AMP eval-only or future tooling).",
+    )
+    parser.add_argument(
+        "--discriminator",
+        type=Path,
+        default=None,
+        help="Optional amp_discriminator.pt (defaults next to checkpoint / train_run.json).",
+    )
+    parser.add_argument(
+        "--eval-output",
+        type=Path,
+        default=None,
+        help="Write eval_motion.json here (default: <output_dir>/eval_motion.json).",
+    )
     args = parser.parse_args(argv)
 
     cfg = _load_config(args.config)
@@ -78,8 +107,70 @@ def main(argv: list[str] | None = None) -> int:
     demo_path = args.demonstration_dataset
 
     mode = str(cfg.get("mode", args.mode))
-    if mode not in ("smoke", "train"):
+    if mode not in ("smoke", "train", "amp"):
         mode = args.mode
+
+    if args.eval_only:
+        if mode != "amp":
+            print(
+                "error: --eval-only requires mode amp (set top-level mode in config or --mode amp)",
+                file=sys.stderr,
+            )
+            return 2
+        ck = args.checkpoint
+        if ck is None:
+            print("error: --eval-only requires --checkpoint", file=sys.stderr)
+            return 2
+        if not ck.is_file():
+            print(f"error: checkpoint not found: {ck}", file=sys.stderr)
+            return 2
+        try:
+            from skill_foundry_rl.motion_eval import run_amp_eval
+        except ImportError:
+            print(
+                "Missing RL training dependencies. Install with: pip install -e '.[rl]'",
+                file=sys.stderr,
+            )
+            raise
+        eval_out = args.eval_output
+        if eval_out is None:
+            me = cfg.get("motion_eval") if isinstance(cfg.get("motion_eval"), dict) else {}
+            if isinstance(me.get("eval_output"), str):
+                eval_out = Path(str(me["eval_output"]))
+            else:
+                eval_out = out / "eval_motion.json"
+        if not eval_out.is_absolute():
+            eval_out = (args.config.resolve().parent / eval_out).resolve()
+        report = run_amp_eval(
+            reference_path=ref_path,
+            config=cfg,
+            checkpoint_path=ck.expanduser().resolve(),
+            output_path=eval_out,
+            discriminator_path=args.discriminator.expanduser().resolve()
+            if args.discriminator
+            else None,
+            seed=int(cfg.get("seed", 42)),
+        )
+        print(json.dumps({"status": "ok", "eval_motion": str(eval_out), **report}, indent=2))
+        return 0
+
+    if mode == "amp":
+        try:
+            from skill_foundry_rl.amp_train import run_amp_train
+        except ImportError:
+            print(
+                "Missing RL training dependencies. Install with: pip install -e '.[rl]'",
+                file=sys.stderr,
+            )
+            raise
+        payload = run_amp_train(
+            reference_path=ref_path,
+            config=cfg,
+            output_dir=out,
+            demonstration_path=demo_path,
+        )
+        print(json.dumps(payload, indent=2))
+        return 0
 
     if mode == "train":
         try:

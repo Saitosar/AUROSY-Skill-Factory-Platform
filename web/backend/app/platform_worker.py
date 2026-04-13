@@ -59,6 +59,27 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
         )
         return
 
+    eval_only = False
+    pm = workspace / "platform_motion.json"
+    if pm.is_file():
+        import json
+
+        try:
+            meta = json.loads(pm.read_text(encoding="utf-8"))
+            eval_only = bool(meta.get("eval_only"))
+        except (json.JSONDecodeError, OSError):
+            eval_only = False
+
+    eval_kw: dict = {}
+    if eval_only:
+        ck = workspace / "policy_checkpoint.zip"
+        eval_out = workspace / "train_out" / "eval_motion.json"
+        eval_kw = {
+            "eval_only": True,
+            "eval_checkpoint": ck,
+            "eval_output": eval_out,
+        }
+
     out_log = workspace / "train_stdout.log"
     err_log = workspace / "train_stderr.log"
 
@@ -71,6 +92,7 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
                 ref_path,
                 demo_path if demo_path.is_file() else None,
                 mode=mode,
+                **eval_kw,
             ),
             timeout=timeout,
         )

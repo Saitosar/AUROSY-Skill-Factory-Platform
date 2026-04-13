@@ -12,6 +12,7 @@ from typing import Any
 
 from skill_foundry_export.manifest import (
     DEFAULT_PACKAGE_VERSION,
+    attach_motion_section,
     build_manifest,
     manifest_json_bytes,
 )
@@ -20,6 +21,9 @@ from skill_foundry_export.manifest import (
 REFERENCE_BUNDLE_FILENAME = "reference_trajectory.json"
 # Phase 6.1 product validation report (optional).
 VALIDATION_REPORT_FILENAME = "validation_report.json"
+# Phase 5 motion evaluation (optional).
+EVAL_MOTION_FILENAME = "eval_motion.json"
+AMP_DISCRIMINATOR_BUNDLE_NAME = "amp_discriminator.pt"
 
 
 def _sha256_file(path: Path) -> str:
@@ -42,6 +46,8 @@ def package_skill(
     include_policy_pt: bool = False,
     include_onnx: bool = False,
     onnx_opset: int = 17,
+    motion_export: dict[str, Any] | None = None,
+    include_amp_discriminator: bool = False,
 ) -> dict[str, Any]:
     """
     Create a ``.tar.gz`` containing ``manifest.json``, ``reference_trajectory.json`` (same file
@@ -49,6 +55,10 @@ def package_skill(
 
     ``run_dir`` must contain ``train_run.json`` and the SB3 checkpoint zip (default stem
     ``ppo_G1TrackingEnv.zip``).
+
+    When ``run_dir`` contains ``eval_motion.json`` and/or AMP ``train_run`` metadata, an optional
+    ``motion`` section is attached to the manifest (Phase 5). Use ``include_amp_discriminator`` to
+    bundle ``amp_discriminator.pt`` when present next to the checkpoint.
     """
     reference_path = reference_path.expanduser().resolve()
     run_dir = run_dir.expanduser().resolve()
@@ -102,6 +112,68 @@ def package_skill(
         "schema_ref": "reference_trajectory_v1",
     }
 
+    me = motion_export if isinstance(motion_export, dict) else {}
+    rp_user = me.get("retarget_profile")
+    if isinstance(rp_user, dict):
+        retarget_profile = dict(rp_user)
+    else:
+        retarget_profile = {
+            "robot": str(manifest["robot"]["profile"]),
+            "source_skeleton": str(me.get("source_skeleton", "mediapipe_pose_33")),
+            "joint_map_version": str(me.get("joint_map_version", "1.0")),
+        }
+
+    eval_path = run_dir / EVAL_MOTION_FILENAME
+    eval_report_meta: dict[str, Any] | None = None
+    if eval_path.is_file():
+        eval_raw = json.loads(eval_path.read_text(encoding="utf-8"))
+        eval_report_meta = {
+            "filename": EVAL_MOTION_FILENAME,
+            "sha256": _sha256_file(eval_path),
+            "schema_version": eval_raw.get("schema_version"),
+        }
+
+    amp_meta: dict[str, Any] | None = None
+    if train_run.get("phase") == "4_amp" or isinstance(train_run.get("amp"), dict):
+        ac = train_run.get("amp") if isinstance(train_run.get("amp"), dict) else {}
+        amp_meta = {
+            "train_phase": train_run.get("phase"),
+            "policy_weights_filename": ckpt_name,
+            "disc_hidden_dim": ac.get("disc_hidden_dim"),
+            "disc_num_layers": ac.get("disc_num_layers"),
+        }
+
+    disc_src: Path | None = None
+    adc = train_run.get("amp_discriminator_checkpoint")
+    if isinstance(adc, str):
+        ap = Path(adc)
+        if ap.is_file():
+            disc_src = ap
+        elif (run_dir / ap.name).is_file():
+            disc_src = run_dir / ap.name
+    if disc_src is None:
+        bundled = run_dir / AMP_DISCRIMINATOR_BUNDLE_NAME
+        if bundled.is_file():
+            disc_src = bundled
+
+    has_motion = (
+        eval_report_meta is not None
+        or amp_meta is not None
+        or include_amp_discriminator
+        or motion_export is not None
+    )
+    if has_motion:
+        amp_for_manifest = dict(amp_meta) if amp_meta is not None else {}
+        if include_amp_discriminator and disc_src is not None and disc_src.is_file():
+            amp_for_manifest["discriminator_bundle_filename"] = AMP_DISCRIMINATOR_BUNDLE_NAME
+        attach_motion_section(
+            manifest,
+            reference_motion_source=REFERENCE_BUNDLE_FILENAME,
+            retarget_profile=retarget_profile,
+            eval_report=eval_report_meta,
+            amp=amp_for_manifest if amp_for_manifest else None,
+        )
+
     validation_path = run_dir / VALIDATION_REPORT_FILENAME
     if validation_path.is_file():
         val_raw = json.loads(validation_path.read_text(encoding="utf-8"))
@@ -120,6 +192,8 @@ def package_skill(
     }
     if validation_path.is_file():
         summary["files"].append(VALIDATION_REPORT_FILENAME)
+    if eval_path.is_file():
+        summary["files"].append(EVAL_MOTION_FILENAME)
 
     policy_pt_name = "policy_weights.pt"
     onnx_name = "policy.onnx"
@@ -132,6 +206,11 @@ def package_skill(
         shutil.copy2(reference_path, root / REFERENCE_BUNDLE_FILENAME)
         if validation_path.is_file():
             shutil.copy2(validation_path, root / VALIDATION_REPORT_FILENAME)
+        if eval_path.is_file():
+            shutil.copy2(eval_path, root / EVAL_MOTION_FILENAME)
+        if include_amp_discriminator and disc_src is not None and disc_src.is_file():
+            shutil.copy2(disc_src, root / AMP_DISCRIMINATOR_BUNDLE_NAME)
+            summary["files"].append(AMP_DISCRIMINATOR_BUNDLE_NAME)
 
         if include_policy_pt:
             from skill_foundry_export.policy_checkpoint import export_policy_state_dict

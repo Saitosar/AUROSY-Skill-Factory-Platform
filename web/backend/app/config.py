@@ -71,6 +71,9 @@ class Settings(BaseSettings):
     skip_validation_gate: bool = False
     """If True, allow publishing packages without product validation (dev only). G1_SKIP_VALIDATION_GATE."""
 
+    motion_publish_max_mse: float | None = None
+    """When set, motion skill bundles must have mean_tracking_mse <= this to publish. G1_MOTION_PUBLISH_MAX_MSE."""
+
     cors_origins: str = "https://aurosy-skill-factory-application.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
     """Comma-separated list of allowed CORS origins. G1_CORS_ORIGINS."""
 
