@@ -37,12 +37,14 @@ flowchart LR
 ```mermaid
 flowchart LR
   capture[MotionCaptureService_MediaPipe33] --> retarget[RetargetingEngine]
-  retarget --> refJson[ReferenceTrajectoryJSON]
+  retarget --> preprocess[PreprocessPipeline_SavgolKalman]
+  preprocess --> refJson[ReferenceTrajectoryJSON]
   refJson --> playback[SimPlayback]
   refJson --> queue[TrainingOrchestrator]
 ```
 
 `RetargetingEngine` реализован в `packages/skill_foundry/skill_foundry_retarget/` и доступен в API через `POST /api/pipeline/retarget`.
+Preprocess pipeline (FreeMoCap/MediaPipe landmarks) реализуется в `packages/skill_foundry/skill_foundry_preprocess/` и запускается в motion pipeline перед `build_reference`.
 
 **Путь Phase 3 (Frontend Camera Live Track):**
 
@@ -63,6 +65,7 @@ flowchart LR
 flowchart LR
   ui[MotionPipelinePanel_SPA] --> run[POST_api_pipeline_motion_run]
   run --> state[motion_pipelines_state_json]
+  run --> prep[preprocess_motion_stage]
   run --> jobs[POST_api_jobs_train]
   jobs --> worker[platform_worker_train]
   worker --> pack[POST_api_packages_from_job]
@@ -127,9 +130,11 @@ flowchart LR
 
 ## 3. Preprocessor service
 
-**Назначение:** превращение разрежённых keyframes в **ReferenceTrajectory** фиксированной частоты: интерполяция (сплайны по углам; для базы/корня — согласованная схема, например SO(3) для ориентации при наличии); ресэмплинг (например 50 Гц); единая нумерация и порядок суставов.
+**Назначение:** превращение разрежённых keyframes и/или сырых landmarks (FreeMoCap/MediaPipe) в устойчивый вход для `build_reference`: интерполяция, сглаживание (Savitzky-Golay / Kalman), ресэмплинг (например 50 Гц), единая нумерация и порядок суставов.
 
 **Локальный контур (MVP):** файловый `keyframes.json` → CLI (`skill-foundry-preprocess` или `python -m skill_foundry_preprocessing`) → `reference_trajectory.json` и лог `preprocess_run.json`. Подробности и поля лога: [04_phase0_contracts.md](../archive/04_phase0_contracts.md), раздел 6.
+
+**Контур video/free-mocap (Phase 6):** `landmarks.json` (`aurosy_video_landmarks_v1` или совместимый формат) → CLI/API `skill-foundry-preprocess-motion` → `preprocessed_landmarks.json` (`aurosy_preprocessed_landmarks_v1`) → retarget/build_reference.
 
 **Входы:** keyframes + тайминги из Artifact store; конфиг робота (число DOF, лимиты — для клиппинга при необходимости).
 

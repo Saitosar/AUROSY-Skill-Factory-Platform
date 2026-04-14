@@ -122,3 +122,57 @@ def enqueue_train_job(
         workspace_relpath=rel,
     )
     return job_id
+
+
+def enqueue_video_process_job(
+    settings: Settings,
+    user_id: str,
+    *,
+    video_id: str,
+    video_artifact: str,
+    target_fps: float = 30.0,
+    start_sec: float | None = None,
+    end_sec: float | None = None,
+) -> str:
+    """Enqueue a video processing job for pose extraction.
+
+    Args:
+        settings: Application settings
+        user_id: User ID
+        video_id: Video ID from ingestion
+        video_artifact: Relative path to video file
+        target_fps: Target FPS for extraction
+        start_sec: Optional start time
+        end_sec: Optional end time
+
+    Returns:
+        Job ID for tracking
+    """
+    root = settings.resolved_platform_data_dir()
+    job_id = str(uuid.uuid4())
+    ws = job_workspace(root, user_id, job_id)
+    ws.mkdir(parents=True, exist_ok=True)
+
+    video_config = {
+        "type": "video_process",
+        "video_id": video_id,
+        "video_artifact": video_artifact,
+        "target_fps": target_fps,
+        "start_sec": start_sec,
+        "end_sec": end_sec,
+    }
+    (ws / "video_config.json").write_text(
+        json.dumps(video_config, indent=2),
+        encoding="utf-8",
+    )
+
+    rel = workspace_relpath(user_id, job_id)
+    job_insert(
+        settings.platform_sqlite_path(),
+        job_id=job_id,
+        user_id=user_id,
+        status="queued",
+        mode="video_process",
+        workspace_relpath=rel,
+    )
+    return job_id

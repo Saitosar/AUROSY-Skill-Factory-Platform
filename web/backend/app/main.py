@@ -69,6 +69,11 @@ from app.services.retargeting import parse_landmarks_payload, run_retargeting
 from app.services.telemetry import mock_telemetry_stream
 from app.services.validation import validate_payload
 from app.services.cortex_api import router as cortex_router
+from app.services.video_ingest import (
+    VideoIngestError,
+    get_video_metadata,
+    ingest_youtube_video,
+)
 
 
 @asynccontextmanager
@@ -258,6 +263,9 @@ class MotionPipelineRunRequest(BaseModel):
     action: Literal[
         "init",
         "attach_capture",
+        "attach_video",
+        "extract_poses",
+        "preprocess_motion",
         "build_reference",
         "enqueue_train",
         "sync",
@@ -279,6 +287,12 @@ class MotionPipelineRunRequest(BaseModel):
     source_skeleton: str = "mediapipe_pose_33"
     target_robot: str = "unitree_g1_29dof"
     clip_to_limits: bool = True
+    preprocess_filter: Literal["savgol", "kalman", "both"] = "both"
+    preprocess_window_length: int = Field(default=7, ge=3)
+    preprocess_polyorder: int = Field(default=2, ge=0)
+    preprocess_confidence_threshold: float = Field(default=0.3, ge=0.0, le=1.0)
+    preprocess_process_noise: float = Field(default=0.01, gt=0.0)
+    preprocess_measurement_noise: float = Field(default=0.1, gt=0.0)
 
 
 class JointTargetsBody(BaseModel):
@@ -475,6 +489,12 @@ async def motion_pipeline_run(
             source_skeleton=req.source_skeleton,
             target_robot=req.target_robot,
             clip_to_limits=req.clip_to_limits,
+            preprocess_filter=req.preprocess_filter,
+            preprocess_window_length=req.preprocess_window_length,
+            preprocess_polyorder=req.preprocess_polyorder,
+            preprocess_confidence_threshold=req.preprocess_confidence_threshold,
+            preprocess_process_noise=req.preprocess_process_noise,
+            preprocess_measurement_noise=req.preprocess_measurement_noise,
         )
     except MotionPipelineError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -974,6 +994,101 @@ def packages_patch(
         "package_id": row["id"],
         "published": bool(row["published"]),
     }
+
+
+class VideoIngestRequest(BaseModel):
+    """Request to ingest a YouTube video for motion extraction."""
+
+    youtube_url: str = Field(..., description="YouTube video URL")
+    start_sec: float | None = Field(default=None, description="Start time for trimming")
+    end_sec: float | None = Field(default=None, description="End time for trimming")
+    max_duration_sec: float = Field(default=120.0, description="Maximum allowed duration")
+
+
+class VideoProcessRequest(BaseModel):
+    """Request to process video for pose extraction."""
+
+    video_id: str = Field(..., description="Video ID from ingestion")
+    target_fps: float = Field(default=30.0, description="Target FPS for extraction")
+    start_sec: float | None = Field(default=None, description="Start time")
+    end_sec: float | None = Field(default=None, description="End time")
+
+
+@app.post("/api/video/ingest")
+async def video_ingest(
+    req: VideoIngestRequest,
+    user_id: str = Depends(get_user_id),
+) -> dict[str, Any]:
+    """Ingest a YouTube video for motion extraction.
+
+    Downloads the video and stores it in the user's workspace.
+    """
+    s = get_settings()
+    try:
+        result = ingest_youtube_video(
+            s,
+            user_id,
+            req.youtube_url,
+            start_sec=req.start_sec,
+            end_sec=req.end_sec,
+            max_duration_sec=req.max_duration_sec,
+        )
+        return {
+            "video_id": result.video_id,
+            "duration_sec": result.duration_sec,
+            "fps": result.fps,
+            "width": result.width,
+            "height": result.height,
+            "title": result.title,
+            "artifact_path": result.artifact_path,
+        }
+    except VideoIngestError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+
+@app.get("/api/video/{video_id}")
+def video_get(
+    video_id: str,
+    user_id: str = Depends(get_user_id),
+) -> dict[str, Any]:
+    """Get metadata for a previously ingested video."""
+    s = get_settings()
+    metadata = get_video_metadata(s, user_id, video_id)
+    if metadata is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return metadata
+
+
+@app.post("/api/video/process")
+async def video_process_enqueue(
+    req: VideoProcessRequest,
+    user_id: str = Depends(get_user_id),
+) -> dict[str, str]:
+    """Enqueue video processing job for pose extraction.
+
+    Returns a job_id that can be used to check status.
+    """
+    from app.platform_enqueue import enqueue_video_process_job
+
+    s = get_settings()
+
+    metadata = get_video_metadata(s, user_id, req.video_id)
+    if metadata is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    try:
+        job_id = enqueue_video_process_job(
+            s,
+            user_id,
+            video_id=req.video_id,
+            video_artifact=metadata["file_path"],
+            target_fps=req.target_fps,
+            start_sec=req.start_sec,
+            end_sec=req.end_sec,
+        )
+        return {"job_id": job_id, "status": "queued"}
+    except EnqueueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @app.websocket("/ws/telemetry")
