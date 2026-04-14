@@ -41,6 +41,9 @@ cortex = [
   "stable-baselines3>=2.3.0",
   "pin>=2.7.0",
 ]
+preprocess = [
+  "filterpy>=1.4.5",
+]
 
 [project.scripts]
 skill-foundry-preprocess = "skill_foundry_preprocessing.cli:main"
@@ -51,6 +54,7 @@ skill-foundry-package = "skill_foundry_export.cli:main"
 skill-foundry-runtime = "skill_foundry_runtime.cli:main"
 skill-foundry-validate-motion = "skill_foundry_validation.cli:main"
 skill-foundry-nmr = "skill_foundry_nmr.cli:main"
+skill-foundry-preprocess-motion = "skill_foundry_preprocess.cli:main"
 
 [tool.setuptools]
 include-package-data = true
@@ -80,6 +84,8 @@ include = [
   "skill_foundry_retarget.*",
   "skill_foundry_validation",
   "skill_foundry_validation.*",
+  "skill_foundry_preprocess",
+  "skill_foundry_preprocess.*",
   "skill_foundry_nmr",
   "skill_foundry_nmr.*",
 ]
@@ -100,6 +106,8 @@ exclude = [
   "skill_foundry_retarget.tests.*",
   "skill_foundry_validation.tests",
   "skill_foundry_validation.tests.*",
+  "skill_foundry_preprocess.tests",
+  "skill_foundry_preprocess.tests.*",
   "skill_foundry_nmr.tests",
   "skill_foundry_nmr.tests.*",
 ]

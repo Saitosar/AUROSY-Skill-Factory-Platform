@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aurosy-skill-foundry-video"
+version = "0.1.0"
+description = "Video processing for AUROSY Skill Factory - YouTube download and pose extraction"
+requires-python = ">=3.10"
+dependencies = [
+    "yt-dlp>=2024.1.0",
+    "numpy>=1.24.0",
+    "opencv-python>=4.8.0",
+]
+
+[project.optional-dependencies]
+pose = [
+    "mediapipe>=0.10.9",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[project.scripts]
+skill-foundry-video-download = "skill_foundry_video.downloader:main"
+skill-foundry-video-extract = "skill_foundry_video.pose_extractor:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["skill_foundry_video*"]

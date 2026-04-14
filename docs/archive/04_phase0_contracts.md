@@ -169,3 +169,19 @@ skill-foundry-preprocess ./path/to/keyframes.json -o ./out/reference_trajectory.
 
 A **DemonstrationDataset v1** file can be produced by headless MuJoCo playback of `reference_trajectory.json`, recording `obs` / `act` (and optionally `ref`) at `1/sim_dt`. See [07_phase2_trajectory_recorder.md](07_phase2_trajectory_recorder.md) for `obs_schema_ref`, CLI (`skill-foundry-playback --demonstration-json`), and metadata fields (`seed`, `simulator`, `simulator_commit`).
 
+## 8) PreprocessedLandmarks v1 (phase 6)
+
+This contract is used for noisy video/capture pipelines before retargeting and training.
+
+- `schema_version` equals `aurosy_preprocessed_landmarks_v1`.
+- `landmarks` is required, shape `[N, 33, 3]`, float coordinates.
+- `confidences` is required, shape `[N, 33]`, values in `[0,1]`.
+- `timestamps_ms` is required, shape `[N]`.
+- `preprocessing_config` is required and stores filter settings (`filter_type`, thresholds, window params, Kalman noise params).
+- `source_format` is required (`freemocap`, `aurosy_video_landmarks_v1`, or compatible source tag).
+- `quality_metrics` is optional but recommended (`raw_jitter`, `smoothed_jitter`, `jitter_reduction_pct`, `low_confidence_ratio`).
+
+CLI entrypoint:
+
+- `skill-foundry-preprocess-motion <input.json> -o <output.json> --filter both`
+

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import time
 from pathlib import Path
@@ -19,6 +20,83 @@ from app.platform_db import (
 from app.services.pipeline import run_train
 
 logger = logging.getLogger(__name__)
+
+
+async def _run_video_process_job(settings: Settings, job_id: str, row: dict[str, Any]) -> None:
+    """Run video processing job to extract poses from video."""
+    db_path = settings.platform_sqlite_path()
+    root = settings.resolved_platform_data_dir()
+    workspace = root / row["workspace_relpath"]
+
+    video_config_path = workspace / "video_config.json"
+    if not video_config_path.is_file():
+        job_finish(
+            db_path,
+            job_id,
+            status="failed",
+            exit_code=2,
+            error_message="missing video_config.json in workspace",
+        )
+        return
+
+    out_log = workspace / "process_stdout.log"
+    err_log = workspace / "process_stderr.log"
+
+    try:
+        video_config = json.loads(video_config_path.read_text(encoding="utf-8"))
+        video_artifact = video_config.get("video_artifact")
+        target_fps = float(video_config.get("target_fps", 30.0))
+        start_sec = video_config.get("start_sec")
+        end_sec = video_config.get("end_sec")
+
+        video_path = root / video_artifact
+        if not video_path.is_file():
+            raise FileNotFoundError(f"Video file not found: {video_artifact}")
+
+        from skill_foundry_video import extract_poses_from_video
+
+        result = extract_poses_from_video(
+            video_path,
+            target_fps=target_fps,
+            start_sec=start_sec,
+            end_sec=end_sec,
+        )
+
+        landmarks_path = workspace / "landmarks.json"
+        result.save_json(landmarks_path)
+
+        summary = {
+            "status": "ok",
+            "frame_count": result.frame_count,
+            "valid_frame_count": result.valid_frame_count,
+            "confidence_mean": result.confidence_mean,
+            "missing_frame_ratio": result.missing_frame_ratio,
+            "duration_sec": result.duration_sec,
+            "fps": result.fps,
+            "landmarks_artifact": str(landmarks_path.relative_to(root)),
+        }
+        (workspace / "process_result.json").write_text(
+            json.dumps(summary, indent=2),
+            encoding="utf-8",
+        )
+
+        out_log.write_text(
+            f"Extracted {result.valid_frame_count}/{result.frame_count} frames\n"
+            f"Mean confidence: {result.confidence_mean:.2%}\n",
+            encoding="utf-8",
+        )
+        job_finish(db_path, job_id, status="succeeded", exit_code=0)
+
+    except ImportError as e:
+        msg = "skill_foundry_video package not installed"
+        logger.error("%s: %s", msg, e)
+        err_log.write_text(f"{msg}: {e}\n", encoding="utf-8")
+        job_finish(db_path, job_id, status="failed", exit_code=2, error_message=msg)
+
+    except Exception as e:
+        logger.exception("video process job %s", job_id)
+        err_log.write_text(repr(e), encoding="utf-8")
+        job_finish(db_path, job_id, status="failed", exit_code=-1, error_message=repr(e))
 
 
 def _pick_claimable_job_id(settings: Settings) -> str | None:
@@ -39,6 +117,12 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
     if not row or row["status"] != "running":
         return
 
+    mode = str(row["mode"])
+
+    if mode == "video_process":
+        await _run_video_process_job(settings, job_id, row)
+        return
+
     root = settings.resolved_platform_data_dir()
     workspace = root / row["workspace_relpath"]
     sdk = settings.resolved_sdk_root()
@@ -46,7 +130,6 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
     cfg_path = workspace / "train_config.json"
     ref_path = workspace / "reference_trajectory.json"
     demo_path = workspace / "demonstration_dataset.json"
-    mode = str(row["mode"])
     timeout = max(1.0, float(settings.job_timeout_sec))
 
     if not cfg_path.is_file() or not ref_path.is_file():
@@ -62,8 +145,6 @@ async def _run_claimed_job(settings: Settings, job_id: str) -> None:
     eval_only = False
     pm = workspace / "platform_motion.json"
     if pm.is_file():
-        import json
-
         try:
             meta = json.loads(pm.read_text(encoding="utf-8"))
             eval_only = bool(meta.get("eval_only"))
